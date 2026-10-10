@@ -1,0 +1,75 @@
+$grid-max: 1200px;
+$grid-cols: 12;
+$bp-sm: 720px;
+$bp-md: 900px;
+$bp-lg: 1200px;
+
+:root {
+  --grid-max: #{$grid-max};
+  --grid-cols: #{$grid-cols};
+  --grid-gutter: 1rem;
+}
+
+@media (min-width: $bp-sm) {
+  :root {
+    --grid-gutter: 1.25rem;
+  }
+}
+
+@media (min-width: $bp-lg) {
+  :root {
+    --grid-gutter: 1.5rem;
+  }
+}
+
+@mixin site-shell {
+  width: min(100% - (var(--grid-gutter) * 2), var(--grid-max));
+  margin-inline: auto;
+}
+
+.container {
+  @include site-shell;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(#{$grid-cols}, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: var(--grid-gutter);
+}
+
+.grid-contents {
+  display: contents;
+}
+
+.is-end {
+  justify-self: end;
+  text-align: right;
+}
+
+@for $i from 1 through $grid-cols {
+  .col-#{$i} {
+    grid-column: span $i;
+  }
+}
+
+@media (max-width: ($bp-md - 1px)) {
+  @for $i from 1 through $grid-cols {
+    .col-md-#{$i} {
+      grid-column: span $i;
+    }
+  }
+}
+
+@media (max-width: ($bp-sm - 1px)) {
+  @for $i from 1 through $grid-cols {
+    .col-sm-#{$i} {
+      grid-column: span $i;
+    }
+  }
+
+  .is-end-sm {
+    justify-self: end;
+    text-align: right;
+  }
+}

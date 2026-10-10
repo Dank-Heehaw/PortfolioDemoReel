@@ -1,0 +1,37 @@
+/** @type {import('../../src/lib/project-content.js').ProjectInput} */
+export default {
+  slug: "nature-cycle",
+  title: "NaturCycle",
+  category: "UI/UX",
+  role: "UX Case Study",
+  year: "2026",
+  tags: ["UX", "Case study", "Product"],
+  summary: "Product case study focused on sustainable cycling — research, flows, and device mockups.",
+  featured: true,
+  assetDir: "NatureCycle",
+  cover: "Cover Slim.png",
+  hero: "Project Desktop.png",
+  devices: [
+    { src: "Project Desktop.png", label: "Desktop" },
+    { src: "Project Tab.png", label: "Tablet" },
+    { src: "Project Mob.png", label: "Mobile" },
+  ],
+  video: {
+    src: "iPhone 16 Mockup.mp4",
+    poster: "iPhone 16 Mockup.png",
+    label: "Product walkthrough",
+  },
+  body: `NaturCycle is a UX case study for a cycling product rooted in sustainability. The work covers framing, interface exploration, and high-fidelity device mockups.`,
+  gallery: [
+    { src: "Artboard 1.png" },
+    { src: "Image.png" },
+    { src: "NaturCycle.png" },
+    { src: "Mockuos.png" },
+    { src: "Untitled-1.png" },
+    { src: "INM300SBB_AbdulWaheedKhanSowdagar_CaseStudy.png" },
+    { src: "INM300SBB_AbdulWaheedKhanSowdagar_CaseStudy2.png" },
+    { src: "INM300SBB_AbdulWaheedKhanSowdagar_CaseStudy3.png" },
+    { src: "INM300SBB_AbdulWaheedKhanSowdagar_CaseStudy4.png" },
+    { src: "INM300SBB_AbdulWaheedKhanSowdagar_CaseStudy5.png" },
+  ],
+};

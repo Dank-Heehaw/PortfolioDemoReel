@@ -1,0 +1,40 @@
+/* Drop licensed Neue Haas Grotesk files into /public/fonts/
+   Expected filenames (rename yours to match, or edit the urls):
+
+   NeueHaasGrotesk-Regular.woff2
+   NeueHaasGrotesk-Medium.woff2
+   NeueHaasGrotesk-Bold.woff2
+   NeueHaasGrotesk-Black.woff2
+*/
+
+@font-face {
+  font-family: "Neue Haas Grotesk";
+  src: url("/fonts/NeueHaasGrotesk-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Neue Haas Grotesk";
+  src: url("/fonts/NeueHaasGrotesk-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Neue Haas Grotesk";
+  src: url("/fonts/NeueHaasGrotesk-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Neue Haas Grotesk";
+  src: url("/fonts/NeueHaasGrotesk-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}

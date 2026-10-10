@@ -1,0 +1,32 @@
+/** @type {import('../../src/lib/project-content.js').ProjectInput} */
+export default {
+  slug: "icons",
+  title: "Fin-Tastic Sharks",
+  category: "Design",
+  role: "Icon Design",
+  year: "2025",
+  tags: ["Icons", "Brand", "BrandBook"],
+  summary: "Icon set and supporting brand pages for a playful shark-led identity system.",
+  featured: true,
+  assetDir: "Icons",
+  cover: "Cover Slim.png",
+  hero: "Project Desktop.png",
+  devices: [
+    { src: "Project Desktop.png", label: "Desktop" },
+    { src: "Project Tab.png", label: "Tablet" },
+  ],
+  body: `A character-led icon and brand book exploration — mark construction, color, and application sheets for Fin-Tastic Sharks.`,
+  gallery: [
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-1.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-2.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-4.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-5.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-7.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-8.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-12.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-13.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-16.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-17.png" },
+    { src: "WaheedKhan-NguyenTamDuong-INM201SCC-BrandBook-18.png" },
+  ],
+};
