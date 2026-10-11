@@ -1,0 +1,41 @@
+{
+  "name": "my-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "My demoreel for my studio GraveyeardShift",
+  "homepage": "https://github.com/Dank-Heehaw/PortfolioDemoReel#readme",
+  "bugs": {
+    "url": "https://github.com/Dank-Heehaw/PortfolioDemoReel/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dank-Heehaw/PortfolioDemoReel.git"
+  },
+  "license": "GNU General Public License v3.0",
+  "author": "Waheed Khan",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "gray-matter": "^4.0.3",
+    "gsap": "^3.15.0",
+    "markdown-it": "^15.0.2",
+    "next": "16.3.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.2.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "sass": "^1.105.1",
+    "typescript": "^5"
+  }
+}
