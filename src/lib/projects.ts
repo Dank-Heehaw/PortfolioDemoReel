@@ -3,6 +3,10 @@
  * Case studies live in src/content/projects/*.ts — edit those files to change a project.
  */
 
+import { cache } from "react";
+import { memoCms } from "./memo";
+import { loadSanity } from "@/sanity/lib/load";
+import { projectsQuery } from "@/sanity/lib/queries";
 import { encodeAssetPath, mediaUrl } from "./media";
 import ford from "@/content/projects/ford";
 import hypedocs from "@/content/projects/hypedocs";
@@ -229,9 +233,8 @@ function dedupeBySlug(items: ProjectInput[]) {
   return [...map.values()];
 }
 
-export function getProjects() {
-  const list = dedupeBySlug(loadProjectSources());
-  return list.sort((a, b) => {
+function sortProjects(list: Project[]) {
+  return [...list].sort((a, b) => {
     if (a.sort != null || b.sort != null) {
       const aRank = a.sort == null ? 9999 : a.sort;
       const bRank = b.sort == null ? 9999 : b.sort;
@@ -245,20 +248,96 @@ export function getProjects() {
   });
 }
 
-export function getProject(slug = "") {
-  return getProjects().find((project) => project.slug === slug);
+export function getLocalProjects() {
+  return sortProjects(dedupeBySlug(loadProjectSources()));
 }
 
-/** URL for a project page: /work/ford */
-export function projectPath(projectOrSlug: string | { slug?: string } | undefined) {
-  const slug = typeof projectOrSlug === "string" ? projectOrSlug : projectOrSlug?.slug;
-  return slug ? `/work/${slug}` : "/work";
+function fromCmsDoc(doc: Record<string, unknown>): Project | null {
+  const slug = String(doc.slug || "").trim();
+  if (!slug) return null;
+
+  const devices = Array.isArray(doc.devices)
+    ? doc.devices
+        .filter((item): item is { src?: string; label?: string } => Boolean(item && typeof item === "object"))
+        .map((item) => ({ src: String(item.src || ""), label: String(item.label || "") }))
+        .filter((item) => item.src)
+    : [];
+
+  const gallery = Array.isArray(doc.gallery)
+    ? doc.gallery
+        .filter((item): item is { src?: string; alt?: string; layout?: string } =>
+          Boolean(item && typeof item === "object")
+        )
+        .map((item) => ({
+          src: String(item.src || ""),
+          alt: String(item.alt || ""),
+          layout: item.layout === "half" ? ("half" as const) : ("full" as const),
+        }))
+        .filter((item) => item.src)
+    : [];
+
+  const videoRaw = doc.video && typeof doc.video === "object" ? (doc.video as { src?: string; poster?: string; label?: string }) : null;
+  const video = videoRaw?.src
+    ? {
+        src: String(videoRaw.src),
+        poster: String(videoRaw.poster || ""),
+        label: String(videoRaw.label || ""),
+      }
+    : null;
+
+  const body = String(doc.body || "").trim();
+
+  return {
+    slug,
+    title: String(doc.title || slug),
+    category: String(doc.category || "Design"),
+    role: String(doc.role || ""),
+    year: String(doc.year || ""),
+    tags: asStringList(doc.tags as string[] | string | undefined),
+    summary: String(doc.summary || ""),
+    body,
+    featured: Boolean(doc.featured),
+    moreWork: typeof doc.moreWork === "boolean" ? doc.moreWork : undefined,
+    sort: Number.isFinite(Number(doc.sort)) ? Number(doc.sort) : null,
+    assetDir: String(doc.assetDir || slug),
+    cover: String(doc.cover || ""),
+    hero: String(doc.hero || doc.cover || ""),
+    devices,
+    video,
+    gallery,
+    hasCaseStudy: Boolean(gallery.length || video || body || devices.length),
+  };
 }
 
-export function projectCover(slug: string) {
-  return getProject(slug)?.cover || mediaUrl(encodeAssetPath(`/projects/${slug}/cover.jpg`));
+const loadProjects = memoCms(async () => {
+  const docs = await loadSanity<Record<string, unknown>[]>(projectsQuery);
+  if (docs?.length) {
+    const projects = docs
+      .map((doc) => fromCmsDoc(doc))
+      .filter((project): project is Project => Boolean(project));
+    if (projects.length) return sortProjects(projects);
+  }
+
+  return getLocalProjects();
+});
+
+export const getProjects = cache(function getProjects() {
+  return loadProjects();
+});
+
+export async function getProject(slug = "") {
+  const projects = await getProjects();
+  return projects.find((project) => project.slug === slug);
 }
 
-export function featuredProjects() {
-  return getProjects().filter((project) => project.featured || project.hasCaseStudy);
+export { projectPath } from "./paths";
+
+export async function projectCover(slug: string) {
+  const project = await getProject(slug);
+  return project?.cover || mediaUrl(encodeAssetPath(`/projects/${slug}/cover.jpg`));
+}
+
+export async function featuredProjects() {
+  const projects = await getProjects();
+  return projects.filter((project) => project.featured || project.hasCaseStudy);
 }

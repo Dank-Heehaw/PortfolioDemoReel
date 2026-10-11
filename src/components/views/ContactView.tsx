@@ -33,8 +33,7 @@ export function ContactView() {
         </h1>
 
         <p className="contact-stage__lede" data-contact-reveal>
-          Brand, motion, and digital work for teams who care about craft. Tell me what you are
-          building. I will reply within a day or two.
+          Brand, motion, and digital work for teams who care about craft.
         </p>
 
         <div className="contact-stage__cta" data-contact-reveal>
@@ -57,7 +56,7 @@ export function ContactView() {
         </div>
         <div className="contact-bar__item">
           <p className="contact-bar__label">Timezone</p>
-          <p className="contact-bar__value">Toronto Time</p>
+          <p className="contact-bar__value">Eastern Daylight Time (EDT)</p>
         </div>
         <div className="contact-bar__item contact-bar__item--social">
           <p className="contact-bar__label">Elsewhere</p>

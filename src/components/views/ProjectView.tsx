@@ -43,8 +43,8 @@ function ProjectGallery({ gallery }: { gallery: Project["gallery"] }) {
   return <div className="project-gallery">{chunks}</div>;
 }
 
-function ProjectRelated({ project }: { project: Project }) {
-  const related = getProjects()
+async function ProjectRelated({ project }: { project: Project }) {
+  const related = (await getProjects())
     .filter((item) => {
       if (item.slug === project.slug) return false;
       if (item.moreWork === false) return false;
@@ -83,7 +83,7 @@ function ProjectRelated({ project }: { project: Project }) {
   );
 }
 
-export function ProjectView({ project }: { project: Project }) {
+export async function ProjectView({ project }: { project: Project }) {
   const topics = formatTopicLine(project.tags);
   const bodyParagraphs = project.body
     ? project.body

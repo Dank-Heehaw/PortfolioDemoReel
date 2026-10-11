@@ -62,7 +62,7 @@ export function menuCurrentFor(routeId = "") {
   return routeId;
 }
 
-/** Footer stays off the full-bleed pages (home, contact, archive). */
+/** Footer stays off the full-bleed pages (home, contact, archive, about). */
 export function shouldShowFooter(routeId = "") {
-  return routeId !== "home" && routeId !== "contact" && routeId !== "archive";
+  return routeId !== "home" && routeId !== "contact" && routeId !== "archive" && routeId !== "about";
 }

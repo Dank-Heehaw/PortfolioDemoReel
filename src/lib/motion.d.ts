@@ -3,6 +3,10 @@
 export const MENU_REVEAL_DELAY: number;
 export const WORK_REVEAL_DELAY: number;
 
+export function setRevealDelay(delay?: number): void;
+export function takeRevealDelay(fallback?: number): number;
+export function leaveSiteView(root?: Element | Document | null): Promise<void>;
+
 export function clearScrollTriggers(): void;
 export function prepareHero(root?: Element | Document | null): void;
 export function revealHero(

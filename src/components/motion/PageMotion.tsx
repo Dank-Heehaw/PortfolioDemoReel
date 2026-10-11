@@ -9,6 +9,14 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import {
+  bindFullpage,
+  prepareHero,
+  revealHero,
+  revealJournalArticle,
+  revealPanel,
+  takeRevealDelay,
+} from "@/lib/motion.js";
 
 gsap.registerPlugin(useGSAP);
 
@@ -19,15 +27,10 @@ export function RevealHero({ children }: { children: React.ReactNode }) {
     () => {
       const root = ref.current;
       if (!root) return;
-      let unbind = () => {};
-
-      import("@/lib/motion.js").then((motion) => {
-        if (!ref.current) return;
-        motion.prepareHero(root);
-        unbind = motion.bindFullpage(root) || (() => {});
-        motion.revealHero(root, { delay: 0.12 });
-      });
-
+      // Run in this layout effect so the hero is clipped before first paint.
+      prepareHero(root);
+      const unbind = bindFullpage(root) || (() => {});
+      revealHero(root, { delay: takeRevealDelay(0.12) });
       return () => unbind();
     },
     { scope: ref }
@@ -47,9 +50,7 @@ export function RevealPanel({ children }: { children: React.ReactNode }) {
     () => {
       const root = ref.current;
       if (!root) return;
-      import("@/lib/motion.js").then((motion) => {
-        if (ref.current) motion.revealPanel(root);
-      });
+      revealPanel(root, { delay: takeRevealDelay(0) });
     },
     { scope: ref }
   );
@@ -68,9 +69,7 @@ export function RevealArticle({ children }: { children: React.ReactNode }) {
     () => {
       const root = ref.current;
       if (!root) return;
-      import("@/lib/motion.js").then((motion) => {
-        if (ref.current) motion.revealJournalArticle(root);
-      });
+      revealJournalArticle(root, { delay: takeRevealDelay(0) });
     },
     { scope: ref }
   );

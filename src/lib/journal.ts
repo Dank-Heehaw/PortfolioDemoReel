@@ -6,6 +6,10 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { cache } from "react";
+import { memoCms } from "./memo";
+import { loadSanity } from "@/sanity/lib/load";
+import { journalQuery } from "@/sanity/lib/queries";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
 
@@ -21,6 +25,7 @@ export type JournalPost = {
   externalUrl: string | null;
   path: string | null;
   summary: string;
+  body: string;
   html: string;
   gallery: Array<{ src: string; alt: string; layout: "half" | "full" }>;
 };
@@ -212,6 +217,7 @@ function journalFromFields(data: Record<string, unknown> = {}, content = ""): Jo
     externalUrl,
     path: externalUrl ? null : `/journal/${slug}`,
     summary: String(data.summary || ""),
+    body: String(body).trim(),
     html: enhanceArticleHtml(md.render(String(body).trim())),
     gallery: normalizeGallery(data.gallery as JournalPost["gallery"]),
   };
@@ -236,20 +242,51 @@ function loadJournalPosts() {
     .sort((a, b) => (b.dateISO || "").localeCompare(a.dateISO || ""));
 }
 
-export function getJournalPosts() {
+export function getLocalJournalPosts() {
   return loadJournalPosts();
 }
 
-export function getJournalPost(slug = "") {
-  return getJournalPosts().find((post) => post.slug === slug);
+function fromCmsDoc(doc: Record<string, unknown>): JournalPost | null {
+  return journalFromFields(
+    {
+      slug: doc.slug,
+      title: doc.title,
+      category: doc.category,
+      tags: doc.tags,
+      date: doc.date,
+      cover: doc.cover,
+      externalUrl: doc.externalUrl,
+      summary: doc.summary,
+      gallery: doc.gallery,
+    },
+    String(doc.body || "")
+  );
 }
 
-/** On-site posts use /journal/slug. External posts use the publisher URL. */
-export function journalPostPath(post: Pick<JournalPost, "externalUrl" | "path" | "slug">) {
-  if (post.externalUrl) return post.externalUrl;
-  return post.path || `/journal/${post.slug}`;
+const readJournalPosts = memoCms(async () => {
+  const docs = await loadSanity<Record<string, unknown>[]>(journalQuery);
+  if (docs?.length) {
+    const posts = docs
+      .map((doc) => fromCmsDoc(doc))
+      .filter((post): post is JournalPost => Boolean(post));
+    if (posts.length) return posts;
+  }
+
+  return getLocalJournalPosts();
+});
+
+export const getJournalPosts = cache(function getJournalPosts() {
+  return readJournalPosts();
+});
+
+export async function getJournalPost(slug = "") {
+  const posts = await getJournalPosts();
+  return posts.find((post) => post.slug === slug);
 }
 
-export function getOnSiteJournalPosts() {
-  return getJournalPosts().filter((post) => !post.externalUrl);
+export { journalPostPath } from "./paths";
+
+export async function getOnSiteJournalPosts() {
+  const posts = await getJournalPosts();
+  return posts.filter((post) => !post.externalUrl);
 }

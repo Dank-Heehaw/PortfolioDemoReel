@@ -71,8 +71,8 @@ function renderGallery(gallery: JournalPost["gallery"] = []) {
   return <div className="archive-gallery">{chunks}</div>;
 }
 
-function ArticleRelatedLinks({ post }: { post: JournalPost }) {
-  const related = getJournalPosts()
+async function ArticleRelatedLinks({ post }: { post: JournalPost }) {
+  const related = (await getJournalPosts())
     .filter((item) => item.slug !== post.slug)
     .slice(0, 3);
 
@@ -113,7 +113,7 @@ function ArticleRelatedLinks({ post }: { post: JournalPost }) {
   );
 }
 
-export function JournalPostView({ post }: { post: JournalPost }) {
+export async function JournalPostView({ post }: { post: JournalPost }) {
   const gallery = Array.isArray(post.gallery) ? post.gallery : [];
   const dateText = post.dateLabel !== "—" ? post.dateLabel : "Draft";
   const topics = formatTopicLine(post.tags);

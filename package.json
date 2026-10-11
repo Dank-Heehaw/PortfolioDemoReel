@@ -14,7 +14,7 @@
   "license": "GNU General Public License v3.0",
   "author": "Waheed Khan",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -25,8 +25,12 @@
     "gsap": "^3.15.0",
     "markdown-it": "^15.0.2",
     "next": "16.3.8",
+    "next-sanity": "^13.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sanity": "^6.18.0",
+    "sharp": "^0.35.5",
+    "styled-components": "^6.5.3"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.2.0",

@@ -1,0 +1,15 @@
+// Shared color tokens. Components @use this file — they do not redefine these.
+
+$orange: #ef6223;
+$ink: #1c1c1c;
+$paper: #ececec;
+$white: #f7f7f7;
+$squircle-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+:root {
+  --orange: #{$orange};
+  --ink: #{$ink};
+  --paper: #{$paper};
+  --white: #{$white};
+  --font-sans: "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

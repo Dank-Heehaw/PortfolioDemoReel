@@ -1,3 +1,8 @@
+import { cache } from "react";
+import { memoCms } from "./memo";
+import { loadSanity } from "@/sanity/lib/load";
+import { archiveQuery } from "@/sanity/lib/queries";
+
 /** Past-work samples shown on /archive. Images live in /public/archive/samples. */
 
 export type ArchivePost = {
@@ -35,8 +40,19 @@ const LOCAL_ARCHIVE_POSTS: ArchivePost[] = [
   { slug: "sample-23", title: "Woven Grid", category: "ART", medium: "Typography", year: "2026", cover: "/archive/samples/sample-23.webp" },
 ];
 
-export function getArchivePosts() {
+export function getLocalArchivePosts() {
   return LOCAL_ARCHIVE_POSTS;
 }
+
+const loadArchivePosts = memoCms(async () => {
+  const docs = await loadSanity<ArchivePost[]>(archiveQuery);
+  const posts = (docs || []).filter((item) => item?.cover);
+  if (posts.length) return posts;
+  return getLocalArchivePosts();
+});
+
+export const getArchivePosts = cache(function getArchivePosts() {
+  return loadArchivePosts();
+});
 
 export const archiveCategories = ["ART", "3D", "Graphics", "UX"];

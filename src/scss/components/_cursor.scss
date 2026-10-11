@@ -1,0 +1,78 @@
+@use "../abstracts" as *;
+
+.site-cursor {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+
+  &__ring {
+    position: relative;
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: transparent;
+    transition:
+      width 0.2s ease,
+      height 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+
+    // Orange plus — hidden at rest, visible only on interactive hover
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: var(--orange);
+      opacity: 0;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
+
+    &::before {
+      width: 8px;
+      height: 1.5px;
+      transform: translate(-50%, -50%);
+    }
+
+    &::after {
+      width: 1.5px;
+      height: 8px;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  // Menu / dark pages: light ring so it stays readable on black
+  body.is-menu-open &__ring,
+  body.nav-theme-dark &__ring {
+    border-color: #f2f2f2;
+  }
+
+  &.is-hover &__ring {
+    width: 22px;
+    height: 22px;
+    border-color: var(--orange);
+    background: rgba($orange, 0.12);
+
+    &::before,
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &.is-down &__ring {
+    width: 8px;
+    height: 8px;
+    background: var(--orange);
+    border-color: var(--orange);
+
+    &::before,
+    &::after {
+      opacity: 0;
+    }
+  }
+}

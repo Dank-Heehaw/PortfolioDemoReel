@@ -1,0 +1,33 @@
+@use "variables" as *;
+
+// Pill buttons — stay pill-shaped; soft scale/shadow on hover.
+@mixin squircle-control($rest: 999px, $hover: 0.75rem) {
+  border-radius: $rest;
+  transition:
+    transform 0.35s $squircle-ease,
+    box-shadow 0.35s $squircle-ease,
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: scale(1.04);
+      box-shadow: 0 6px 18px rgba($ink, 0.16);
+    }
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+    &:hover,
+    &:active {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}

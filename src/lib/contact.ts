@@ -1,4 +1,5 @@
 /** Inbox for the Contact page mailto buttons and the site footer. */
+
 export const CONTACT_EMAIL = "awk.sowdagar@outlook.com";
 
 export const SOCIAL_LINKS = [

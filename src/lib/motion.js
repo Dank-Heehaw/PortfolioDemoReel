@@ -94,6 +94,42 @@ export const MENU_REVEAL_DELAY = 0.32;
 /** Slightly longer handoff when exiting the Work drill-down into /work. */
 export const WORK_REVEAL_DELAY = 0.42;
 
+/** Stash a reveal delay across the Next.js route swap (read once on the new page). */
+export function setRevealDelay(delay = 0) {
+  if (!isBrowser) return;
+  document.documentElement.dataset.revealDelay = String(delay);
+}
+
+export function takeRevealDelay(fallback = 0) {
+  if (!isBrowser) return fallback;
+  const raw = document.documentElement.dataset.revealDelay;
+  delete document.documentElement.dataset.revealDelay;
+  if (raw == null || raw === "") return fallback;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+/** Slide the current page out when navigating without the menu overlay. */
+export function leaveSiteView(root = document) {
+  const view = root.querySelector?.("[data-site-view]") || root;
+  const panel = view.querySelector(".motion-root") || view.firstElementChild;
+  if (!panel) return Promise.resolve();
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    gsap.to(panel, {
+      autoAlpha: 0,
+      y: 32,
+      duration: 0.42,
+      ease: "power3.in",
+      overwrite: "auto",
+      onComplete: resolve,
+    });
+  });
+}
+
 function notifyMenuHandoff() {
   const waiters = handoffWaiters.splice(0, handoffWaiters.length);
   waiters.forEach((resolve) => resolve());
@@ -126,7 +162,8 @@ export function closeSiteMenu({ origin = null, fromWorkPanel = false } = {}) {
 
 export function bindSiteNav(root = document) {
   const nav = root.querySelector(".site-nav");
-  const navBackdrop = nav?.querySelector("[data-nav-backdrop]");
+  const navBackdrop =
+    root.querySelector("[data-nav-backdrop]") || nav?.querySelector("[data-nav-backdrop]");
   const menu = root.querySelector("[data-menu]");
   const toggles = root.querySelectorAll("[data-menu-toggle]");
   const mark = nav?.querySelector(".site-nav__mark");
@@ -137,8 +174,8 @@ export function bindSiteNav(root = document) {
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const rows = gsap.utils.toArray(".nav-menu__row", menu);
-  const icons = gsap.utils.toArray(".nav-menu__icon", menu);
-  const lineInners = gsap.utils.toArray(".reveal-line__inner", menu);
+  const icons = gsap.utils.toArray(".nav-menu__row .nav-menu__icon", menu);
+  const lineInners = gsap.utils.toArray(".nav-menu__row .reveal-line__inner", menu);
   const markTargets = [markDefault, markHover, markMenu].filter(Boolean);
   let workTl = null;
 
@@ -184,6 +221,16 @@ export function bindSiteNav(root = document) {
       ease: "power2.out",
       overwrite: "auto",
     });
+    // Hide the outline mark so it cannot sit under the orange fill
+    // (on dark pages that outline is inverted to white).
+    if (markDefault) {
+      gsap.to(markDefault, {
+        autoAlpha: active ? 0 : 1,
+        duration: 0.28,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    }
   };
 
   const animateMarkOpen = (tl, at = 0.22) => {
@@ -782,7 +829,8 @@ export function bindSiteNav(root = document) {
     workCats.forEach((btn) => {
       const on = btn.dataset.workCat === id;
       btn.classList.toggle("is-active", on);
-      btn.setAttribute("aria-pressed", String(on));
+      if (on) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
     });
     workCards.forEach((card) => {
       card.classList.toggle("is-active", card.dataset.workCard === id);
@@ -825,8 +873,9 @@ export function bindSiteNav(root = document) {
 
     const workCat = event.target.closest("[data-work-cat]");
     if (workCat) {
-      event.preventDefault();
       setWorkCategory(workCat.dataset.workCat || "");
+      if (workCat.closest("[data-menu-close]")) return;
+      event.preventDefault();
       return;
     }
 
@@ -879,7 +928,14 @@ export function bindSiteNav(root = document) {
   mark?.addEventListener("focus", onMarkEnter);
   mark?.addEventListener("blur", onMarkLeave);
 
+  const onWorkCatOver = (event) => {
+    const cat = event.target.closest("[data-work-cat]");
+    if (!cat || !menu.contains(cat)) return;
+    setWorkCategory(cat.dataset.workCat || "");
+  };
+
   root.addEventListener("click", onClick);
+  menu.addEventListener("pointerover", onWorkCatOver);
   menu.addEventListener("close", onMenuCloseEvent);
   window.addEventListener("keydown", onKey);
 
@@ -891,6 +947,7 @@ export function bindSiteNav(root = document) {
     window.removeEventListener("resize", onResize);
     window.removeEventListener("keydown", onKey);
     root.removeEventListener("click", onClick);
+    menu.removeEventListener("pointerover", onWorkCatOver);
     menu.removeEventListener("close", onMenuCloseEvent);
     if (workPanelOpen || workTl) snapCloseWorkPanel();
     stopMenuAnimation();

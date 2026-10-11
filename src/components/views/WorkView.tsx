@@ -9,7 +9,7 @@ export function WorkView({ projects }: { projects: Project[] }) {
         <Grid>
           <Col span={12}>
             <header className="site-page__head" data-reveal>
-              <SectionLabel text="© Featured Projects プロジェクト · (WDX® — 02)" />
+              <SectionLabel />
               <h2 className="work-list__title">All projects</h2>
             </header>
             <ProjectList projects={projects} />

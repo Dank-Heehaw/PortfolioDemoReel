@@ -1,0 +1,393 @@
+.nav-menu {
+  position: fixed;
+  top: var(--nav-height, 4.5rem);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  background: #0a0a0a;
+  color: #f2f2f2;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  -webkit-overflow-scrolling: touch;
+
+  &[hidden] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &:has(.is-selecting) {
+    overflow: visible;
+  }
+
+  &.is-work-open {
+    overflow: hidden;
+  }
+}
+
+.nav-menu__rows {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  width: 100%;
+  min-height: 100%;
+
+  .nav-menu.is-work-open & {
+    overflow: hidden;
+  }
+}
+
+.nav-menu.is-work-open .nav-menu__row {
+  overflow: hidden;
+  will-change: transform, flex-grow, min-height;
+
+  &:not([data-menu-work]) {
+    pointer-events: none;
+  }
+
+  &[data-menu-work] {
+    flex-grow: 0;
+    flex-shrink: 0;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover,
+      &:focus-visible {
+        background: transparent;
+        color: #f2f2f2;
+
+        .nav-menu__icon {
+          color: rgba(#fff, 0.85);
+        }
+
+        .nav-menu__label-inner {
+          color: var(--orange);
+        }
+      }
+    }
+
+    &.is-selecting .nav-menu__label-inner,
+    &[aria-current="page"] .nav-menu__label-inner {
+      color: var(--orange);
+    }
+  }
+}
+
+.nav-menu__row,
+.nav-menu__work-cat,
+.nav-menu__work-cta {
+  flex: 1 1 0;
+  min-height: max(5rem, 13vh);
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-bottom: 1px solid rgba(#fff, 0.12);
+  color: inherit;
+  text-decoration: none;
+  background: transparent;
+  appearance: none;
+  font: inherit;
+  text-align: inherit;
+  padding: 0;
+
+  html.has-custom-cursor & {
+    cursor: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    transition: background 0.25s ease, color 0.25s ease;
+
+    &:hover,
+    &:focus-visible {
+      background: #e8e8e8;
+      color: #0a0a0a;
+
+      .nav-menu__icon {
+        color: #0a0a0a;
+      }
+
+      .nav-menu__label-inner {
+        color: #0a0a0a;
+      }
+    }
+  }
+
+  &[aria-current]:not(:hover):not(:focus-visible),
+  &.is-active:not(:hover):not(:focus-visible) {
+    .nav-menu__label-inner {
+      color: var(--orange);
+    }
+  }
+
+  &.is-selecting {
+    background: #e8e8e8;
+    color: #0a0a0a;
+    z-index: 1;
+    overflow: visible;
+
+    .nav-menu__row-inner,
+    .nav-menu__label-wrap,
+    .reveal-line {
+      overflow: visible;
+    }
+
+    .nav-menu__icon {
+      color: #0a0a0a;
+    }
+
+    .nav-menu__label-inner {
+      color: #0a0a0a;
+    }
+
+    .nav-menu__meta {
+      opacity: 0.55;
+    }
+  }
+
+  // Work drill-down: stay on dark panel — no white selection band
+  &[data-menu-work].is-selecting {
+    background: transparent;
+    color: #f2f2f2;
+
+    .nav-menu__icon {
+      color: rgba(#fff, 0.85);
+    }
+
+    .nav-menu__label-inner {
+      color: #fff;
+    }
+
+    .nav-menu__meta {
+      opacity: 0.45;
+    }
+  }
+
+  &.nav-menu__row--right .nav-menu__icon-slot,
+  &--right .nav-menu__icon-slot {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  &.nav-menu__row--right .nav-menu__label-wrap,
+  &--right .nav-menu__label-wrap {
+    grid-column: 2;
+    justify-self: end;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    text-align: right;
+  }
+
+  &.nav-menu__row--left .nav-menu__label-wrap,
+  &--left .nav-menu__label-wrap {
+    grid-column: 1;
+    justify-self: start;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  &.nav-menu__row--left .nav-menu__icon-slot,
+  &--left .nav-menu__icon-slot {
+    grid-column: 2;
+    justify-self: end;
+  }
+}
+
+.nav-menu__row:last-child,
+.nav-menu__work-cta {
+  border-bottom: 0;
+}
+
+.nav-menu__row-inner {
+  min-height: inherit;
+}
+
+.nav-menu__icon-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+}
+
+.nav-menu__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: rgba(#fff, 0.85);
+  flex-shrink: 0;
+}
+
+.nav-menu__label-wrap {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0.65rem 0.85rem;
+  min-width: 0;
+  flex: 0 1 auto;
+
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+  }
+}
+
+.nav-menu__label {
+  display: block;
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: clamp(2.5rem, 8vh, 6rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.nav-menu__label-inner {
+  display: block;
+  white-space: nowrap;
+}
+
+.nav-menu__meta {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.45;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// Work drill-down sits in the list between Work and About, expanding into the gap
+.nav-menu__work {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 0;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0;
+  padding: 0;
+  background: transparent;
+  color: #f2f2f2;
+
+  &[hidden] {
+    display: none;
+  }
+
+  .nav-menu.is-work-open & {
+    flex: 1 1 0%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+  }
+}
+
+.nav-menu__work-head {
+  display: none;
+}
+
+.nav-menu__work-eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.nav-menu__work-title {
+  margin: 0;
+  flex: 1;
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.nav-menu__work-back {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  padding: 0.4rem 0;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      color: var(--orange);
+    }
+  }
+}
+
+.nav-menu__work-cats {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.nav-menu__work-cat,
+.nav-menu__work-cta {
+  flex: 1 1 0;
+}
+
+@media (max-width: 899px) {
+  .nav-menu__row-inner {
+    column-gap: 1rem;
+  }
+
+  .nav-menu__label {
+    font-size: clamp(2rem, 7.5vw, 4.5rem);
+  }
+}
+
+@media (max-width: 719px) {
+  .nav-menu__row,
+  .nav-menu__work-cat,
+  .nav-menu__work-cta {
+    min-height: max(4.25rem, 10vh);
+  }
+
+  .nav-menu__label {
+    font-size: clamp(1.85rem, 9vw, 3rem);
+  }
+
+  .nav-menu__label-inner {
+    white-space: normal;
+  }
+
+  .nav-menu__label-wrap {
+    gap: 0.35rem 0.65rem;
+  }
+
+  .nav-menu__meta {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 399px) {
+  .nav-menu__row-inner {
+    column-gap: 0.65rem;
+  }
+
+  .nav-menu__icon-slot {
+    width: 1.35rem;
+  }
+
+  .nav-menu__icon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+}
