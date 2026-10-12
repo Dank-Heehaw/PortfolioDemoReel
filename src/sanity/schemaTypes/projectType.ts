@@ -43,8 +43,47 @@ export const projectType = defineType({
       type: 'number',
       validation: (rule) => rule.required().integer().min(1900).max(2200),
     }),
+    defineField({name: 'designer', type: 'string'}),
+    defineField({
+      name: 'contribution',
+      title: 'Role / Contributions',
+      type: 'text',
+      rows: 2,
+    }),
+    defineField({
+      name: 'nextProject',
+      title: 'Next project',
+      type: 'reference',
+      to: [{type: 'project'}],
+    }),
+    defineField({
+      name: 'prototypeUrl',
+      title: 'Figma prototype URL',
+      description: 'Paste a public Figma prototype or design URL to embed it on the project page.',
+      type: 'url',
+      validation: (rule) =>
+        rule.uri({scheme: ['https']}).custom((value) => {
+          if (!value) return true;
+          try {
+            const url = new URL(value);
+            return (
+              url.hostname === 'www.figma.com' &&
+              /^\/(proto|design)\//.test(url.pathname)
+            ) || 'Enter an HTTPS Figma prototype or design URL.'
+          } catch {
+            return 'Enter a valid HTTPS Figma prototype or design URL.'
+          }
+        }),
+    }),
     defineField({
       name: 'tags',
+      type: 'array',
+      of: [defineArrayMember({type: 'string'})],
+    }),
+    defineField({
+      name: 'software',
+      title: 'Software used',
+      description: 'List the apps used on this project. Recognized software displays its brand icon.',
       type: 'array',
       of: [defineArrayMember({type: 'string'})],
     }),
@@ -71,6 +110,12 @@ export const projectType = defineType({
     }),
     defineField({
       name: 'video',
+      title: 'Main video',
+      type: 'projectVideo',
+    }),
+    defineField({
+      name: 'shortVideo',
+      title: 'Short-form video',
       type: 'projectVideo',
     }),
     defineField({

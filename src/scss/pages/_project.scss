@@ -134,6 +134,114 @@
   }
 }
 
+.project-case__credits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1.5rem 2rem;
+  margin: 0 0 3rem;
+
+  dt {
+    margin: 0 0 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.45;
+  }
+
+  dd {
+    margin: 0;
+    max-width: 42ch;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+
+.project-software {
+  margin-bottom: 3rem;
+}
+
+.project-software__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-software__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.project-software__icon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.65rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 1;
+
+  svg {
+    display: block;
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: currentColor;
+  }
+}
+
+.project-software__icon--after-effects {
+  background: #1e123d;
+  color: #9999ff;
+}
+
+.project-software__icon--premiere-pro {
+  background: #24143f;
+  color: #9999ff;
+}
+
+.project-software__icon--photoshop,
+.project-software__icon--lightroom {
+  background: #001e36;
+  color: #31a8ff;
+}
+
+.project-software__icon--illustrator {
+  background: #330000;
+  color: #ff9a00;
+}
+
+.project-software__icon--indesign {
+  background: #49021f;
+  color: #ff3366;
+}
+
+.project-software__icon--blender {
+  background: #191919;
+  color: #f5792a;
+}
+
+.project-software__icon--figma {
+  background: #1e1e1e;
+  color: #f24e1e;
+}
+
+.project-software__icon--generic {
+  background: #202020;
+  color: #f2f2f2;
+  text-transform: uppercase;
+}
+
+.project-software__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .project-section__title {
   margin: 0 0 1.25rem;
   font-size: clamp(1.2rem, 2.5vw, 1.6rem);
@@ -180,12 +288,52 @@
   overflow: hidden;
   background: #111;
 
+  iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    background: #000;
+  }
+
   video {
     display: block;
     width: 100%;
     height: auto;
     max-height: 80vh;
     background: #000;
+  }
+}
+
+.project-video__frame--portrait {
+  width: min(100%, 24rem);
+  margin-inline: auto;
+
+  iframe {
+    aspect-ratio: 9 / 16;
+    max-height: 80vh;
+  }
+}
+
+.project-prototype {
+  margin-bottom: 3rem;
+}
+
+.project-prototype__frame {
+  overflow: hidden;
+  width: min(100%, 22rem, 36.92svh);
+  aspect-ratio: 9 / 19.5;
+  margin-inline: auto;
+  border: 1px solid rgba(#fff, 0.12);
+  border-radius: 1rem;
+  background: #141414;
+
+  iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #141414;
   }
 }
 
@@ -262,7 +410,27 @@
   letter-spacing: -0.02em;
 }
 
-@media (max-width: 819px) {
+@media (min-width: 720px) and (max-width: 1023px) {
+  .project-case__hero {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .project-case__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-gallery__pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-related__row {
+    grid-template-columns: 6rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 719px) {
   .project-case__hero {
     grid-template-columns: 1fr;
   }

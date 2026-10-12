@@ -1,4 +1,7 @@
 import { Container } from "@/components/ui/Container";
+import { FigmaPrototype } from "@/components/ui/FigmaPrototype";
+import { ProjectVideoPlayer } from "@/components/ui/ProjectVideoPlayer";
+import { ProjectSoftware } from "@/components/ui/ProjectSoftware";
 import { getProjects, projectPath, type Project } from "@/lib/projects";
 
 function formatTopicLine(tags: string[] = []) {
@@ -44,7 +47,11 @@ function ProjectGallery({ gallery }: { gallery: Project["gallery"] }) {
 }
 
 async function ProjectRelated({ project }: { project: Project }) {
-  const related = (await getProjects())
+  const projects = await getProjects();
+  const nextProject = projects.find((item) => item.slug === project.nextProjectSlug);
+  const related = nextProject
+    ? [nextProject]
+    : projects
     .filter((item) => {
       if (item.slug === project.slug) return false;
       if (item.moreWork === false) return false;
@@ -56,8 +63,8 @@ async function ProjectRelated({ project }: { project: Project }) {
   if (!related.length) return null;
 
   return (
-    <nav className="project-related" aria-label="More projects" data-reveal>
-      <p className="project-related__label">More work</p>
+    <nav className="project-related" aria-label={nextProject ? "Next project" : "More projects"} data-reveal>
+      <p className="project-related__label">{nextProject ? "Next project" : "More work"}</p>
       <ul className="project-related__list">
         {related.map((item) => (
           <li key={item.slug}>
@@ -155,6 +162,25 @@ export async function ProjectView({ project }: { project: Project }) {
             </div>
           ) : null}
 
+          {project.designer || project.contribution ? (
+            <dl className="project-case__credits" data-reveal>
+              {project.designer ? (
+                <div>
+                  <dt>Designer</dt>
+                  <dd>{project.designer}</dd>
+                </div>
+              ) : null}
+              {project.contribution ? (
+                <div>
+                  <dt>Role</dt>
+                  <dd>{project.contribution}</dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : null}
+
+          <ProjectSoftware software={project.software} />
+
           {project.devices?.length ? (
             <section className="project-devices" data-reveal>
               <h2 className="project-section__title">Across devices</h2>
@@ -177,16 +203,30 @@ export async function ProjectView({ project }: { project: Project }) {
           {project.video ? (
             <section className="project-video" data-reveal>
               <h2 className="project-section__title">{project.video.label || "Walkthrough"}</h2>
-              <div className="project-video__frame">
-                <video
-                  controls
-                  playsInline
-                  preload="none"
-                  poster={project.video.poster || ""}
-                  src={project.video.src}
-                />
-              </div>
+              <ProjectVideoPlayer
+                src={project.video.src}
+                poster={project.video.poster}
+                label={project.video.label || project.title}
+              />
             </section>
+          ) : null}
+
+          {project.shortVideo ? (
+            <section className="project-video" data-reveal>
+              <h2 className="project-section__title">
+                {project.shortVideo.label || "Short film"}
+              </h2>
+              <ProjectVideoPlayer
+                src={project.shortVideo.src}
+                poster={project.shortVideo.poster}
+                label={project.shortVideo.label || `${project.title} short film`}
+                orientation="portrait"
+              />
+            </section>
+          ) : null}
+
+          {project.prototypeUrl ? (
+            <FigmaPrototype src={project.prototypeUrl} title={project.title} />
           ) : null}
 
           <ProjectGallery gallery={project.gallery} />

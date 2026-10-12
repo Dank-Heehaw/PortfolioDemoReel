@@ -8,7 +8,12 @@ export const PROJECTS_QUERY = defineQuery(`
       category,
       role,
       year,
+      designer,
+      contribution,
+      "nextProjectSlug": nextProject->slug.current,
+      prototypeUrl,
       tags,
+      software,
       summary,
       body,
       featured,
@@ -25,6 +30,14 @@ export const PROJECTS_QUERY = defineQuery(`
           "src": video.src,
           "poster": video.poster.asset->url,
           "label": video.label
+        },
+        null
+      ),
+      "shortVideo": select(
+        defined(shortVideo.src) => {
+          "src": shortVideo.src,
+          "poster": shortVideo.poster.asset->url,
+          "label": shortVideo.label
         },
         null
       ),
