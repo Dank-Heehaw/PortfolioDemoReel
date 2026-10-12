@@ -1,5 +1,38 @@
 import { Container } from "@/components/ui/Container";
 import { getJournalPosts, journalPostPath, type JournalPost } from "@/lib/journal";
+import { PortableText, type PortableTextComponents } from "next-sanity";
+import Link from "next/link";
+
+const portableTextComponents: PortableTextComponents = {
+  types: {
+    image: ({ value }) => {
+      const imageUrl =
+        "imageUrl" in value && typeof value.imageUrl === "string" ? value.imageUrl : "";
+      if (!imageUrl) return null;
+
+      const alt = "alt" in value && typeof value.alt === "string" ? value.alt : "";
+      return (
+        <figure className="archive-article__figure">
+          <img src={imageUrl} alt={alt} loading="lazy" />
+        </figure>
+      );
+    },
+  },
+  marks: {
+    link: ({ children, value }) => {
+      const href = value?.href || "";
+      const external = /^https?:\/\//i.test(href);
+      return (
+        <a
+          href={href}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
+          {children}
+        </a>
+      );
+    },
+  },
+};
 
 function formatTopicLine(tags: string[] = []) {
   if (!tags.length) return "";
@@ -83,28 +116,44 @@ async function ArticleRelatedLinks({ post }: { post: JournalPost }) {
         {related.map((item) => {
           const href = journalPostPath(item);
           const dateText = item.dateLabel !== "—" ? item.dateLabel : "";
+          const content = (
+            <>
+              <span className="archive-article__links-tag">{item.category}</span>
+              <span className="archive-article__links-title">{item.title}</span>
+              {dateText ? (
+                <time
+                  className="archive-article__links-date"
+                  {...(item.dateISO ? { dateTime: item.dateISO } : {})}
+                >
+                  {dateText}
+                </time>
+              ) : null}
+            </>
+          );
           return (
             <li key={item.slug}>
-              <a
-                href={href}
-                className="archive-article__links-row"
-                data-journal-preview-link
-                data-preview-image={item.cover}
-                {...(item.externalUrl
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : { "data-nav": true })}
-              >
-                <span className="archive-article__links-tag">{item.category}</span>
-                <span className="archive-article__links-title">{item.title}</span>
-                {dateText ? (
-                  <time
-                    className="archive-article__links-date"
-                    {...(item.dateISO ? { dateTime: item.dateISO } : {})}
-                  >
-                    {dateText}
-                  </time>
-                ) : null}
-              </a>
+              {item.externalUrl ? (
+                <a
+                  href={href}
+                  className="archive-article__links-row"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-journal-preview-link
+                  data-preview-image={item.cover}
+                >
+                  {content}
+                </a>
+              ) : (
+                <Link
+                  href={href}
+                  className="archive-article__links-row"
+                  data-nav
+                  data-journal-preview-link
+                  data-preview-image={item.cover}
+                >
+                  {content}
+                </Link>
+              )}
             </li>
           );
         })}
@@ -124,9 +173,9 @@ export async function JournalPostView({ post }: { post: JournalPost }) {
       <Container className="container--article">
         <article className="archive-article archive-article--editorial">
           <div className="archive-article__toolbar" data-reveal>
-            <a className="archive-article__back-link" href="/journal" data-nav>
+            <Link className="archive-article__back-link" href="/journal" data-nav>
               ← Journal
-            </a>
+            </Link>
             <time {...(post.dateISO ? { dateTime: post.dateISO } : {})}>{dateText}</time>
           </div>
 
@@ -137,9 +186,9 @@ export async function JournalPostView({ post }: { post: JournalPost }) {
             <div className="archive-article__hero-copy">
               <div className="archive-article__hero-meta">
                 <p className="archive-article__eyebrow">
-                  <a href="/journal" data-nav>
+                  <Link href="/journal" data-nav>
                     Journal
-                  </a>
+                  </Link>
                   <span aria-hidden="true"> / </span>
                   {post.category}
                 </p>
@@ -165,7 +214,11 @@ export async function JournalPostView({ post }: { post: JournalPost }) {
             </div>
           </header>
 
-          {post.html ? (
+          {post.portableBody?.length ? (
+            <div className="archive-article__body archive-article__body--md">
+              <PortableText value={post.portableBody} components={portableTextComponents} />
+            </div>
+          ) : post.html ? (
             <div
               className="archive-article__body archive-article__body--md"
               dangerouslySetInnerHTML={{ __html: post.html }}

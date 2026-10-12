@@ -4,6 +4,8 @@
  */
 
 import { cache } from "react";
+import { client } from "@/sanity/lib/client";
+import { PROJECTS_QUERY } from "@/sanity/queries/projects";
 import { encodeAssetPath, mediaUrl } from "./media";
 import ford from "@/content/projects/ford";
 import hypedocs from "@/content/projects/hypedocs";
@@ -249,8 +251,38 @@ export function getLocalProjects() {
   return sortProjects(dedupeBySlug(loadProjectSources()));
 }
 
-export const getProjects = cache(function getProjects() {
-  return getLocalProjects();
+export const getProjects = cache(async function getProjects() {
+  const sanityProjects = await client.fetch<ProjectInput[]>(PROJECTS_QUERY);
+  if (!sanityProjects.length) return getLocalProjects();
+
+  const projectsBySlug = new Map(
+    getLocalProjects().map((project) => [project.slug, project])
+  );
+  for (const rawProject of sanityProjects) {
+    const localProject = projectsBySlug.get(rawProject.slug);
+    const project = normalizeProject({
+      ...rawProject,
+      title: rawProject.title || localProject?.title,
+      category: rawProject.category || localProject?.category,
+      role: rawProject.role || localProject?.role,
+      year: rawProject.year ?? localProject?.year,
+      tags: rawProject.tags?.length ? rawProject.tags : localProject?.tags,
+      summary: rawProject.summary || localProject?.summary,
+      body: rawProject.body || localProject?.body,
+      featured: rawProject.featured ?? localProject?.featured,
+      moreWork: rawProject.moreWork ?? localProject?.moreWork,
+      sort: rawProject.sort ?? localProject?.sort ?? undefined,
+      assetDir: rawProject.assetDir || localProject?.assetDir,
+      cover: rawProject.cover || localProject?.cover,
+      hero: rawProject.hero || localProject?.hero,
+      devices: rawProject.devices?.length ? rawProject.devices : localProject?.devices,
+      video: rawProject.video || localProject?.video,
+      gallery: rawProject.gallery?.length ? rawProject.gallery : localProject?.gallery,
+    });
+    if (project) projectsBySlug.set(project.slug, project);
+  }
+
+  return sortProjects([...projectsBySlug.values()]);
 });
 
 export async function getProject(slug = "") {

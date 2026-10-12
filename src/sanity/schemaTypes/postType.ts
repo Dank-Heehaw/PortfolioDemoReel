@@ -17,6 +17,22 @@ export const postType = defineType({
       options: {
         source: 'title',
       },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'category',
+      title: 'Journal category',
+      type: 'string',
+      initialValue: 'Blog post',
+    }),
+    defineField({name: 'tags', type: 'array', of: [defineArrayMember({type: 'string'})]}),
+    defineField({name: 'summary', type: 'text', rows: 3}),
+    defineField({
+      name: 'externalUrl',
+      title: 'External article URL',
+      description: 'Set this for articles hosted on another site.',
+      type: 'url',
+      validation: (rule) => rule.uri({scheme: ['http', 'https']}),
     }),
     defineField({
       name: 'author',
@@ -49,6 +65,11 @@ export const postType = defineType({
     defineField({
       name: 'body',
       type: 'blockContent',
+    }),
+    defineField({
+      name: 'gallery',
+      type: 'array',
+      of: [defineArrayMember({type: 'journalGalleryItem'})],
     }),
   ],
   preview: {

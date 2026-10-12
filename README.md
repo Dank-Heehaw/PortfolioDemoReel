@@ -20,6 +20,33 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Sanity content
+
+The embedded Sanity Studio is available at `/studio`. Create **Project**,
+**Archive item**, and **Post** documents there to manage the project index,
+archive gallery, and journal. Journal posts use Portable Text for rich content,
+and archive/project images are uploaded to Sanity.
+
+Published documents replace local entries with the same slug. Existing local
+content remains visible as a fallback until it is migrated; new Sanity entries
+are added to the site automatically.
+
+The default Sanity project is `de6gdkw7` with the `production` dataset. Override
+these defaults with `NEXT_PUBLIC_SANITY_PROJECT_ID` and
+`NEXT_PUBLIC_SANITY_DATASET` when needed. Project, archive, and journal routes
+use 60-second incremental revalidation. Log in to the Sanity CLI, then allow
+the local and production Studio origins:
+
+```bash
+npx sanity login
+npx sanity cors add http://localhost:3000 --project-id de6gdkw7 --credentials
+npx sanity cors add https://portfolio-demo-reel.vercel.app --project-id de6gdkw7 --credentials
+```
+
+Create content in Studio using the **Projects**, **Archive**, and **Posts**
+sections. Each new document needs a title and slug; publish it to make it
+available on the site.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -1,4 +1,4 @@
-import { archiveCategories, type ArchivePost } from "@/lib/archive";
+import { archiveCategories as localArchiveCategories, type ArchivePost } from "@/lib/archive";
 
 function ArchivePiece({ item }: { item: ArchivePost }) {
   const medium = item.medium || item.category || "Study";
@@ -29,6 +29,12 @@ function ArchivePiece({ item }: { item: ArchivePost }) {
 
 /** Archive stays one URL. The viewer is an in-page lightbox, not /archive/slug. */
 export function ArchiveView({ items }: { items: ArchivePost[] }) {
+  const categories = [
+    ...localArchiveCategories,
+    ...new Set(items.map((item) => item.category).filter(Boolean)),
+  ];
+  const uniqueCategories = [...new Set(categories)];
+
   return (
     <div className="site-page site-page--past">
       <section className="archive-board" data-archive-reveal>
@@ -39,7 +45,7 @@ export function ArchiveView({ items }: { items: ArchivePost[] }) {
               <span className="archive-cats__dot" aria-hidden="true" />
               All
             </button>
-            {archiveCategories.map((cat) => (
+            {uniqueCategories.map((cat) => (
               <button
                 key={cat}
                 type="button"

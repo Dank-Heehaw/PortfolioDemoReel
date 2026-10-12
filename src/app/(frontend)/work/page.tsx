@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: "Project Index",
 };
 
+export const revalidate = 60;
+
 export default async function WorkPage() {
   const projects = await getProjects();
 

@@ -9,6 +9,13 @@ import path from "node:path";
 import { cache } from "react";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
+import type { ArbitraryTypedObject, PortableTextBlock } from "@portabletext/types";
+import { client } from "@/sanity/lib/client";
+import { JOURNAL_POSTS_QUERY } from "@/sanity/queries/journal";
+
+export type JournalPortableBlock =
+  | PortableTextBlock
+  | (ArbitraryTypedObject & { _type: "image"; imageUrl?: string; alt?: string });
 
 export type JournalPost = {
   slug: string;
@@ -24,6 +31,7 @@ export type JournalPost = {
   summary: string;
   body: string;
   html: string;
+  portableBody?: JournalPortableBlock[];
   gallery: Array<{ src: string; alt: string; layout: "half" | "full" }>;
 };
 
@@ -188,14 +196,24 @@ function enhanceArticleHtml(html = "") {
   return out.join("");
 }
 
-function journalFromFields(data: Record<string, unknown> = {}, content = ""): JournalPost | null {
+function journalFromFields(
+  data: Record<string, unknown> = {},
+  content = "",
+  portableBody?: JournalPortableBlock[]
+): JournalPost | null {
   const slug = String(data.slug || "").trim();
   if (!slug) return null;
   const body =
     typeof content === "string" && content.trim()
       ? content
-      : String(data.body || data.content || "");
-  const dateISO = data.date ? new Date(String(data.date)).toISOString().slice(0, 10) : "";
+      : typeof data.body === "string"
+        ? data.body
+        : String(data.content || "");
+  const parsedDate = data.date ? new Date(String(data.date)) : null;
+  const dateISO =
+    parsedDate && !Number.isNaN(parsedDate.getTime())
+      ? parsedDate.toISOString().slice(0, 10)
+      : "";
   const year = dateISO ? dateISO.slice(0, 4) : String(new Date().getFullYear());
   const externalUrl = (data.external_url || data.externalUrl || null) as string | null;
   const category = externalUrl
@@ -216,6 +234,7 @@ function journalFromFields(data: Record<string, unknown> = {}, content = ""): Jo
     summary: String(data.summary || ""),
     body: String(body).trim(),
     html: enhanceArticleHtml(md.render(String(body).trim())),
+    ...(portableBody?.length ? { portableBody } : {}),
     gallery: normalizeGallery(data.gallery as JournalPost["gallery"]),
   };
 }
@@ -243,8 +262,50 @@ export function getLocalJournalPosts() {
   return loadJournalPosts();
 }
 
-export const getJournalPosts = cache(function getJournalPosts() {
-  return getLocalJournalPosts();
+type SanityJournalPost = {
+  slug: string;
+  title?: string;
+  category?: string;
+  tags?: string[];
+  publishedAt?: string;
+  summary?: string;
+  externalUrl?: string | null;
+  cover?: string;
+  body?: JournalPortableBlock[];
+  gallery?: Array<{ src?: string; alt?: string; layout?: string }>;
+};
+
+export const getJournalPosts = cache(async function getJournalPosts() {
+  const sanityPosts = await client.fetch<SanityJournalPost[]>(JOURNAL_POSTS_QUERY);
+  if (!sanityPosts.length) return getLocalJournalPosts();
+
+  const postsBySlug = new Map(
+    getLocalJournalPosts().map((post) => [post.slug, post])
+  );
+  for (const rawPost of sanityPosts) {
+    const localPost = postsBySlug.get(rawPost.slug);
+    const post = journalFromFields(
+      {
+        slug: rawPost.slug,
+        title: rawPost.title || localPost?.title,
+        category: rawPost.category || localPost?.category,
+        tags: rawPost.tags?.length ? rawPost.tags : localPost?.tags,
+        date: rawPost.publishedAt || localPost?.dateISO,
+        summary: rawPost.summary || localPost?.summary,
+        externalUrl: rawPost.externalUrl ?? localPost?.externalUrl,
+        cover: rawPost.cover || localPost?.cover,
+        body: localPost?.body || "",
+        gallery: rawPost.gallery?.length ? rawPost.gallery : localPost?.gallery,
+      },
+      "",
+      rawPost.body?.length ? rawPost.body : localPost?.portableBody
+    );
+    if (post) postsBySlug.set(post.slug, post);
+  }
+
+  return [...postsBySlug.values()].sort((a, b) =>
+    (b.dateISO || "").localeCompare(a.dateISO || "")
+  );
 });
 
 export async function getJournalPost(slug = "") {

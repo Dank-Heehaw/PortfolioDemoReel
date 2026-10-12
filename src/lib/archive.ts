@@ -1,4 +1,6 @@
 import { cache } from "react";
+import { client } from "@/sanity/lib/client";
+import { ARCHIVE_ITEMS_QUERY } from "@/sanity/queries/archive";
 
 /** Past-work samples shown on /archive. Images live in /public/archive/samples. */
 
@@ -41,8 +43,35 @@ export function getLocalArchivePosts() {
   return LOCAL_ARCHIVE_POSTS;
 }
 
-export const getArchivePosts = cache(function getArchivePosts() {
-  return getLocalArchivePosts();
+type SanityArchiveItem = {
+  slug?: string;
+  title?: string;
+  category?: string;
+  medium?: string;
+  year?: string | number;
+  cover?: string;
+};
+
+export const getArchivePosts = cache(async function getArchivePosts() {
+  const sanityItems = await client.fetch<SanityArchiveItem[]>(ARCHIVE_ITEMS_QUERY);
+  if (!sanityItems.length) return getLocalArchivePosts();
+
+  const itemsBySlug = new Map(
+    getLocalArchivePosts().map((item) => [item.slug, item])
+  );
+  for (const rawItem of sanityItems) {
+    if (!rawItem.slug || !rawItem.cover) continue;
+    itemsBySlug.set(rawItem.slug, {
+      slug: rawItem.slug,
+      title: rawItem.title || rawItem.slug,
+      category: rawItem.category || "ART",
+      medium: rawItem.medium || "",
+      year: String(rawItem.year || ""),
+      cover: rawItem.cover,
+    });
+  }
+
+  return [...itemsBySlug.values()];
 });
 
 export const archiveCategories = ["ART", "3D", "Graphics", "UX"];

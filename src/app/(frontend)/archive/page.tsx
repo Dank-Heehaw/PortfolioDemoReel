@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: "Archive",
 };
 
+export const revalidate = 60;
+
 export default async function ArchivePage() {
   const items = await getArchivePosts();
 
