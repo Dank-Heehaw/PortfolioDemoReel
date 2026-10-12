@@ -1,7 +1,4 @@
 import { cache } from "react";
-import { memoCms } from "./memo";
-import { loadSanity } from "@/sanity/lib/load";
-import { archiveQuery } from "@/sanity/lib/queries";
 
 /** Past-work samples shown on /archive. Images live in /public/archive/samples. */
 
@@ -44,15 +41,8 @@ export function getLocalArchivePosts() {
   return LOCAL_ARCHIVE_POSTS;
 }
 
-const loadArchivePosts = memoCms(async () => {
-  const docs = await loadSanity<ArchivePost[]>(archiveQuery);
-  const posts = (docs || []).filter((item) => item?.cover);
-  if (posts.length) return posts;
-  return getLocalArchivePosts();
-});
-
 export const getArchivePosts = cache(function getArchivePosts() {
-  return loadArchivePosts();
+  return getLocalArchivePosts();
 });
 
 export const archiveCategories = ["ART", "3D", "Graphics", "UX"];

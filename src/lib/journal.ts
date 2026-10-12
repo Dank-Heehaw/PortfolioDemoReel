@@ -7,9 +7,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { cache } from "react";
-import { memoCms } from "./memo";
-import { loadSanity } from "@/sanity/lib/load";
-import { journalQuery } from "@/sanity/lib/queries";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
 
@@ -246,37 +243,8 @@ export function getLocalJournalPosts() {
   return loadJournalPosts();
 }
 
-function fromCmsDoc(doc: Record<string, unknown>): JournalPost | null {
-  return journalFromFields(
-    {
-      slug: doc.slug,
-      title: doc.title,
-      category: doc.category,
-      tags: doc.tags,
-      date: doc.date,
-      cover: doc.cover,
-      externalUrl: doc.externalUrl,
-      summary: doc.summary,
-      gallery: doc.gallery,
-    },
-    String(doc.body || "")
-  );
-}
-
-const readJournalPosts = memoCms(async () => {
-  const docs = await loadSanity<Record<string, unknown>[]>(journalQuery);
-  if (docs?.length) {
-    const posts = docs
-      .map((doc) => fromCmsDoc(doc))
-      .filter((post): post is JournalPost => Boolean(post));
-    if (posts.length) return posts;
-  }
-
-  return getLocalJournalPosts();
-});
-
 export const getJournalPosts = cache(function getJournalPosts() {
-  return readJournalPosts();
+  return getLocalJournalPosts();
 });
 
 export async function getJournalPost(slug = "") {

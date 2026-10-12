@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { draftMode } from "next/headers";
-import { VisualEditing } from "next-sanity/visual-editing";
 import { SiteChrome } from "@/components/SiteChrome";
 import { getStaticWorkCategories } from "@/lib/work";
 import { getSiteMarks } from "@/lib/site";
@@ -22,10 +20,9 @@ export const viewport: Viewport = {
   themeColor: "#ef6223",
 };
 
-export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
+export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   const workCategories = getStaticWorkCategories();
-  const marks = await getSiteMarks();
-  const preview = (await draftMode()).isEnabled;
+  const marks = getSiteMarks();
 
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
@@ -33,7 +30,6 @@ export default async function FrontendLayout({ children }: { children: React.Rea
         <SiteChrome workCategories={workCategories} marks={marks}>
           {children}
         </SiteChrome>
-        {preview ? <VisualEditing /> : null}
       </body>
     </html>
   );

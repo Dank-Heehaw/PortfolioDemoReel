@@ -5,19 +5,8 @@ import path from "node:path";
 // in a parent folder does not steal the workspace root.
 const nextConfig: NextConfig = {
   devIndicators: false,
-  compiler: {
-    styledComponents: true,
-  },
   turbopack: {
     root: path.join(__dirname),
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "cdn.sanity.io",
-      },
-    ],
   },
 };
 
