@@ -10,7 +10,7 @@ export function WorkView({ projects }: { projects: Project[] }) {
           <Col span={12}>
             <header className="site-page__head" data-reveal>
               <SectionLabel />
-              <h2 className="work-list__title">All projects</h2>
+              <h1 className="work-list__title">Project Index</h1>
             </header>
             <ProjectList projects={projects} />
           </Col>

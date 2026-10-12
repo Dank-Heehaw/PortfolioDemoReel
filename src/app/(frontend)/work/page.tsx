@@ -6,7 +6,7 @@ import { getProjects } from "@/lib/projects";
 // /work  — this file is the page because it lives at app/work/page.tsx
 
 export const metadata: Metadata = {
-  title: "Work",
+  title: "Project Index",
 };
 
 export default async function WorkPage() {
