@@ -551,7 +551,26 @@ export function bindSiteNav(root = document) {
   const workCards = gsap.utils.toArray("[data-work-card]", menu);
   const workCta = workPanel?.querySelector(".nav-menu__work-cta");
   const workBits = [...workCats, ...workCards, workCta].filter(Boolean);
+  const workPreviewLayers = workPanel
+    ? gsap.utils.toArray("[data-work-preview-layer]", workPanel)
+    : [];
+  let workPreviewFront = 0;
+  let workPreviewSrc = "";
+  let workPreviewTarget = "";
+  let workPreviewToken = 0;
+  let workPreviewPending = false;
   let workPanelOpen = false;
+
+  if (workPreviewLayers.length) {
+    gsap.set(workPreviewLayers, { autoAlpha: 0, scale: 1, y: 0 });
+    workCats.forEach((cat) => {
+      const src = cat.dataset.workCover;
+      if (!src) return;
+      const preload = new Image();
+      preload.decoding = "async";
+      preload.src = src;
+    });
+  }
 
   const workIndex = workRow ? rows.indexOf(workRow) : -1;
   const aboveRows = workIndex > 0 ? rows.slice(0, workIndex) : [];
@@ -592,6 +611,7 @@ export function bindSiteNav(root = document) {
       clearProps: "flexGrow,flexBasis,flexShrink,minHeight,maxHeight,height,y,yPercent,autoAlpha,opacity,visibility",
     });
     if (workBits.length) gsap.set(workBits, { clearProps: "all" });
+    resetWorkPreview();
   };
 
   const snapCloseWorkPanel = () => {
@@ -599,7 +619,9 @@ export function bindSiteNav(root = document) {
       workTl.kill();
       workTl = null;
     }
-    gsap.killTweensOf([workPanel, workRow, ...aboveRows, ...belowRows, ...workBits].filter(Boolean));
+    gsap.killTweensOf(
+      [workPanel, workRow, ...aboveRows, ...belowRows, ...workBits, ...workPreviewLayers].filter(Boolean)
+    );
     resetWorkLayout();
   };
 
@@ -627,6 +649,125 @@ export function bindSiteNav(root = document) {
       gsap.to(card, { marginTop: 0, duration: 0.45, ease: "power3.out", overwrite: "auto" });
     });
   };
+
+  /** Drop the cover crossfade back to a hidden resting state. */
+  function resetWorkPreview() {
+    workPreviewToken += 1;
+    workPreviewPending = false;
+    workPreviewSrc = "";
+    workPreviewTarget = "";
+    workPreviewFront = 0;
+    if (!workPreviewLayers.length) return;
+    gsap.killTweensOf(workPreviewLayers);
+    gsap.set(workPreviewLayers, { autoAlpha: 0, scale: 1, y: 0 });
+  }
+
+  /**
+   * Crossfade the work-panel cover. The current layer stays up until the next
+   * image has decoded, then opacity and a short transform hand off.
+   */
+  function showWorkCover(src, { immediate = false } = {}) {
+    if (workPreviewLayers.length < 2 || !src) return;
+    if (src === workPreviewTarget) return;
+    workPreviewTarget = src;
+
+    const token = ++workPreviewToken;
+    let incoming;
+    let outgoing;
+
+    if (workPreviewPending) {
+      incoming = workPreviewLayers[workPreviewFront];
+      outgoing = workPreviewLayers[(workPreviewFront + 1) % 2];
+    } else {
+      const incomingIndex = (workPreviewFront + 1) % 2;
+      workPreviewFront = incomingIndex;
+      workPreviewPending = true;
+      incoming = workPreviewLayers[incomingIndex];
+      outgoing = workPreviewLayers[(incomingIndex + 1) % 2];
+    }
+
+    const motionOff =
+      immediate || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const reveal = () => {
+      if (token !== workPreviewToken) return;
+      workPreviewPending = false;
+      workPreviewSrc = src;
+      workPreviewTarget = src;
+
+      if (motionOff) {
+        gsap.killTweensOf(workPreviewLayers);
+        gsap.set(incoming, { autoAlpha: 1, scale: 1, y: 0 });
+        gsap.set(outgoing, { autoAlpha: 0, scale: 1, y: 0 });
+        return;
+      }
+
+      gsap.killTweensOf([incoming, outgoing]);
+      gsap.fromTo(
+        incoming,
+        { autoAlpha: 0, scale: 1.045, y: 14 },
+        {
+          autoAlpha: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power3.out",
+          overwrite: "auto",
+        }
+      );
+      gsap.to(outgoing, {
+        autoAlpha: 0,
+        scale: 0.985,
+        y: -10,
+        duration: 0.38,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
+
+    const fail = () => {
+      if (token !== workPreviewToken) return;
+      workPreviewPending = false;
+      workPreviewTarget = workPreviewSrc;
+      const outgoingIndex = workPreviewLayers.indexOf(outgoing);
+      workPreviewFront = outgoingIndex >= 0 ? outgoingIndex : 0;
+    };
+
+    const ready = () => {
+      if (token !== workPreviewToken) return;
+      const decoded = incoming.decode?.();
+      if (decoded && typeof decoded.then === "function") {
+        decoded.then(reveal).catch(reveal);
+        return;
+      }
+      reveal();
+    };
+
+    if (incoming.getAttribute("src") === src && incoming.complete) {
+      if (incoming.naturalWidth) ready();
+      else fail();
+      return;
+    }
+
+    const onLoad = () => {
+      incoming.removeEventListener("load", onLoad);
+      incoming.removeEventListener("error", onError);
+      ready();
+    };
+    const onError = () => {
+      incoming.removeEventListener("load", onLoad);
+      incoming.removeEventListener("error", onError);
+      fail();
+    };
+    incoming.addEventListener("load", onLoad);
+    incoming.addEventListener("error", onError);
+    incoming.setAttribute("src", src);
+  }
+
+  function revealActiveCover() {
+    const active = workCats.find((btn) => btn.classList.contains("is-active")) || workCats[0];
+    showWorkCover(active?.dataset.workCover || "", { immediate: reduce });
+  }
 
   const setOpen = (open, { origin = null, fromWorkPanel = false } = {}) => {
     // Already at (or heading to) this state — ignore duplicate requests.
@@ -675,6 +816,7 @@ export function bindSiteNav(root = document) {
     if (workTl && workTl.reversed()) {
       applyWorkOpenState(true);
       workPanel.hidden = false;
+      revealActiveCover();
       workTl.play();
       return;
     }
@@ -688,6 +830,7 @@ export function bindSiteNav(root = document) {
     workPanel.hidden = false;
     setCardTransitions(false);
     gsap.set(workPanel, { autoAlpha: 1, overflow: "hidden" });
+    revealActiveCover();
 
     if (reduce) {
       gsap.set(aboveRows, { flexGrow: 0.001, flexBasis: 0, minHeight: 0, autoAlpha: 0, y: -menuHeight });
@@ -836,6 +979,8 @@ export function bindSiteNav(root = document) {
       card.classList.toggle("is-active", card.dataset.workCard === id);
     });
     syncActiveCardAlign(id);
+    const activeCat = workCats.find((btn) => btn.dataset.workCat === id);
+    showWorkCover(activeCat?.dataset.workCover || "");
   };
 
   const closeMenu = (origin = null, { fromWorkPanel = false } = {}) => {
@@ -934,8 +1079,15 @@ export function bindSiteNav(root = document) {
     setWorkCategory(cat.dataset.workCat || "");
   };
 
+  const onWorkCatFocus = (event) => {
+    const cat = event.target.closest("[data-work-cat]");
+    if (!cat || !menu.contains(cat)) return;
+    setWorkCategory(cat.dataset.workCat || "");
+  };
+
   root.addEventListener("click", onClick);
   menu.addEventListener("pointerover", onWorkCatOver);
+  menu.addEventListener("focusin", onWorkCatFocus);
   menu.addEventListener("close", onMenuCloseEvent);
   window.addEventListener("keydown", onKey);
 
@@ -948,7 +1100,10 @@ export function bindSiteNav(root = document) {
     window.removeEventListener("keydown", onKey);
     root.removeEventListener("click", onClick);
     menu.removeEventListener("pointerover", onWorkCatOver);
+    menu.removeEventListener("focusin", onWorkCatFocus);
     menu.removeEventListener("close", onMenuCloseEvent);
+    workPreviewToken += 1;
+    if (workPreviewLayers.length) gsap.killTweensOf(workPreviewLayers);
     if (workPanelOpen || workTl) snapCloseWorkPanel();
     stopMenuAnimation();
     document.body.classList.remove("is-menu-open", "is-menu-work");

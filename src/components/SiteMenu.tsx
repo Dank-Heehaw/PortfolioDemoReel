@@ -78,6 +78,12 @@ function MenuRow({ item, current }: { item: MenuItem; current: string }) {
 function WorkPanel({ workCategories }: { workCategories: WorkCategory[] }) {
   return (
     <div className="nav-menu__work" id="site-menu-work" data-menu-work-panel hidden>
+      <figure className="nav-menu__work-preview" data-work-preview aria-hidden="true">
+        <span className="nav-menu__work-preview-frame">
+          <img alt="" data-work-preview-layer draggable={false} decoding="async" />
+          <img alt="" data-work-preview-layer draggable={false} decoding="async" />
+        </span>
+      </figure>
       <div className="nav-menu__work-head" aria-hidden="true">
         <p className="nav-menu__work-eyebrow">Selected</p>
         <h2 className="nav-menu__work-title">Work</h2>

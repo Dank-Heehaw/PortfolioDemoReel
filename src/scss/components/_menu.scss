@@ -338,6 +338,48 @@
   width: 100%;
 }
 
+// Cover sits in the empty right half of the category list. GSAP crossfades the
+// two layers (opacity + transform only) when the active category changes.
+.nav-menu__work-preview {
+  position: absolute;
+  z-index: 2;
+  top: 8%;
+  right: var(--shell-inset);
+  width: min(18.5rem, 26vw);
+  margin: 0;
+  pointer-events: none;
+
+  @media (max-width: 899px) {
+    display: none;
+  }
+}
+
+.nav-menu__work-preview-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0.85rem;
+}
+
+.nav-menu__work-preview-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-menu__work-preview-frame img {
+    will-change: auto;
+  }
+}
+
 .nav-menu__work-cat,
 .nav-menu__work-cta {
   flex: 1 1 0;

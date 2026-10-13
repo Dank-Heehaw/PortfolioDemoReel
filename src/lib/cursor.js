@@ -32,7 +32,8 @@ export function bindJournalLinkPreview(root = document) {
   let pointerX = 0;
   let pointerY = 0;
   const PREVIEW_REST_SCALE = 0.84;
-  const previewMotionProps = "scale,opacity,autoAlpha,visibility,borderRadius";
+  const PREVIEW_START_SCALE = 0.78;
+  const previewMotionProps = "scale,opacity,autoAlpha,visibility";
 
   gsap.set(preview, {
     autoAlpha: 0,
@@ -70,7 +71,7 @@ export function bindJournalLinkPreview(root = document) {
   const playIn = () => {
     if (open) return;
     open = true;
-    const id = ++gen;
+    gen += 1;
     gsap.killTweensOf(preview, previewMotionProps);
 
     if (prefersReduce()) {
@@ -80,13 +81,12 @@ export function bindJournalLinkPreview(root = document) {
 
     gsap.fromTo(
       preview,
-      { autoAlpha: 0, scale: 0.22, borderRadius: "50%" },
+      { autoAlpha: 0, scale: PREVIEW_START_SCALE },
       {
         autoAlpha: 1,
         scale: 1,
-        borderRadius: "1.15rem",
-        duration: 0.58,
-        ease: "back.out(1.35)",
+        duration: 0.42,
+        ease: "power3.out",
         overwrite: "auto",
       }
     );
@@ -105,14 +105,13 @@ export function bindJournalLinkPreview(root = document) {
 
     gsap.to(preview, {
       autoAlpha: 0,
-      scale: 0.22,
-      borderRadius: "50%",
-      duration: 0.32,
-      ease: "power3.in",
+      scale: PREVIEW_START_SCALE,
+      duration: 0.24,
+      ease: "power2.in",
       overwrite: "auto",
       onComplete: () => {
         if (id !== gen) return;
-        gsap.set(preview, { scale: PREVIEW_REST_SCALE, borderRadius: "1.15rem" });
+        gsap.set(preview, { scale: PREVIEW_REST_SCALE });
       },
     });
   };

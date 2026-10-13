@@ -66,6 +66,10 @@ body.is-archive-viewer {
   gap: 0.85rem;
   padding: 0.15rem 0.15rem 0.8rem 0;
   scrollbar-color: rgba(#fff, 0.28) transparent;
+
+  &.is-swapping .archive-piece {
+    will-change: transform, opacity;
+  }
 }
 
 .archive-piece {
@@ -321,6 +325,7 @@ body.is-archive-viewer {
   display: grid;
   justify-items: start;
   gap: 0.2rem;
+  margin-top: 4.5rem;
 }
 
 .archive-side__copy {
@@ -360,12 +365,13 @@ body.is-archive-viewer {
   }
 
   &.is-active {
-    color: #fff;
+    color: var(--orange);
   }
 
   &.is-active .archive-cats__dot {
     opacity: 1;
     transform: scale(1);
+    background: currentColor;
   }
 }
 

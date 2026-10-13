@@ -148,20 +148,20 @@ function normalizeProject(raw: ProjectInput, fileSlug = ""): Project | null {
 /** Cover-only rows until those folders get full case-study assets. */
 const LEGACY_COVER_PROJECTS: ProjectInput[] = [
   {
-    slug: "photography",
+    slug: "motion design",
     title: "TIFF 2026",
     category: "Motion",
     role: "Motion Design",
     year: "2026",
     tags: ["Motion", "Festival"],
     summary: "Motion design for TIFF-related work.",
-    assetDir: "photography",
+    assetDir: "motion-design",
     cover: "cover.jpg",
   },
   {
     slug: "william-sonoma",
     title: "Williams Sonoma",
-    category: "Layouts",
+    category: "Campaigns",
     role: "IMC Campaign",
     year: "2026",
     tags: ["Editorial", "Campaign"],
@@ -172,7 +172,7 @@ const LEGACY_COVER_PROJECTS: ProjectInput[] = [
   {
     slug: "nectar",
     title: "Nectar Energy",
-    category: "Design",
+    category: "Branding",
     role: "Brand Design",
     year: "2025",
     tags: ["Business", "Brand"],
@@ -183,7 +183,7 @@ const LEGACY_COVER_PROJECTS: ProjectInput[] = [
   {
     slug: "web101",
     title: "Website 101 Podcast",
-    category: "Web",
+    category: "Motion",
     role: "Motion Design",
     year: "2025",
     tags: ["Web", "Motion"],
@@ -194,12 +194,23 @@ const LEGACY_COVER_PROJECTS: ProjectInput[] = [
   {
     slug: "seneca-spot",
     title: "Seneca Spot",
-    category: "Apps",
+    category: "UI/  UX",
     role: "Mobile App Design",
     year: "2024",
     tags: ["Product", "Pitch"],
     summary: "Campus experience concept and pitch materials.",
     assetDir: "seneca-spot",
+    cover: "cover.jpg",
+  },
+    {
+    slug: "the-occult-shop",
+    title: "The Occult Shop",
+    category: "Photography",
+    role: "Brand Design",
+    year: "2024",
+    tags: ["Product", "Pitch"],
+    summary: "Campus experience concept and pitch materials.",
+    assetDir: "the-occult-shop",
     cover: "cover.jpg",
   },
 ];
@@ -209,11 +220,12 @@ const FEATURED_ORDER = [
   "hypedocs",
   "icons",
   "ford",
-  "photography",
+  "motion design",
   "william-sonoma",
   "nectar",
   "web101",
   "seneca-spot",
+  "the-occult-shop"
 ];
 
 function loadProjectSources(): ProjectInput[] {

@@ -22,7 +22,8 @@
 
     &:hover,
     &:focus-visible {
-      color: #f2f2f2;
+      border-bottom-color: rgba(#0a0a0a, 0.14);
+      color: #0a0a0a;
     }
   }
 }
@@ -56,12 +57,27 @@
 }
 
 .project-index__pills {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
 }
 
+.project-index__pill-indicator {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  border-radius: 999px;
+  background: #f2f2f2;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, width, height;
+}
+
 .project-index__pill {
+  position: relative;
+  z-index: 1;
   padding: 0.48rem 0.9rem;
   border: 1px solid rgba(#fff, 0.24);
   border-radius: 999px;
@@ -74,7 +90,6 @@
   transition:
     color 220ms var(--project-index-ease),
     border-color 220ms var(--project-index-ease),
-    background-color 220ms var(--project-index-ease),
     transform 220ms var(--project-index-ease);
 
   &:hover {
@@ -85,7 +100,7 @@
 
   &.is-active {
     border-color: #f2f2f2;
-    background: #f2f2f2;
+    background: transparent;
     color: #0a0a0a;
   }
 
@@ -102,10 +117,10 @@
     position: absolute;
     z-index: -1;
     inset: 0 -1rem;
-    background: rgba(#fff, 0.07);
+    background: #f2f2f2;
     content: "";
     opacity: 0;
-    transform: scaleY(0.88);
+    transform: scaleY(0.92);
     transition:
       opacity 260ms var(--project-index-ease),
       transform 360ms var(--project-index-ease);
@@ -153,32 +168,20 @@
 
   &:hover .site-works__title,
   &:focus-visible .site-works__title {
-    color: var(--orange);
-    transform: translateX(0.35rem);
+    color: #0a0a0a;
+    transform: none;
   }
 
   .site-works__category {
-    padding: 0.35rem 0.7rem;
-    border: 1px solid rgba(#fff, 0.25);
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    line-height: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: inherit;
     opacity: 0.7;
-    transition:
-      border-color 220ms var(--project-index-ease),
-      background-color 220ms var(--project-index-ease),
-      color 220ms var(--project-index-ease),
-      opacity 220ms var(--project-index-ease);
-  }
-
-  &:hover .site-works__category,
-  &:focus-visible .site-works__category {
-    border-color: var(--orange);
-    background: var(--orange);
-    color: #0a0a0a;
-    opacity: 1;
+    text-transform: none;
   }
 }
 
@@ -209,7 +212,7 @@
 
     .site-works__category {
       font-size: 0.6rem;
-      padding: 0.32rem 0.55rem;
+      padding: 0;
     }
   }
 }
