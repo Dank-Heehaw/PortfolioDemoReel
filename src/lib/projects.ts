@@ -7,10 +7,6 @@ import { cache } from "react";
 import { client } from "@/sanity/lib/client";
 import { PROJECTS_QUERY } from "@/sanity/queries/projects";
 import { encodeAssetPath, mediaUrl } from "./media";
-import ford from "@/content/projects/ford";
-import hypedocs from "@/content/projects/hypedocs";
-import icons from "@/content/projects/icons";
-import natureCycle from "@/content/projects/nature-cycle";
 import { framerProjects } from "@/content/projects/framer";
 
 export type ProjectInput = {
@@ -165,92 +161,24 @@ function normalizeProject(raw: ProjectInput, fileSlug = ""): Project | null {
   };
 }
 
-/** Cover-only rows until those folders get full case-study assets. */
-const LEGACY_COVER_PROJECTS: ProjectInput[] = [
-  {
-    slug: "photography",
-    title: "TIFF 2026",
-    category: "Motion",
-    role: "Motion Design",
-    year: "2026",
-    tags: ["Motion", "Festival"],
-    summary: "Motion design for TIFF-related work.",
-    assetDir: "photography",
-    cover: "tiff-2026-cover.jpg",
-    software: ["Adobe After Effects", "Blender", "Adobe Premiere Pro"],
-    video: {
-      src: "https://youtu.be/F0Hzpv6ZtyM?si=rNHOWqClXTMvwtjX",
-      label: "TIFF 2026 Film",
-    },
-    shortVideo: {
-      src: "https://youtube.com/shorts/C3YLQvYCXz4?si=zOopFCeonGDDOoOh",
-      label: "TIFF 2026 Short",
-    },
-  },
-  {
-    slug: "william-sonoma",
-    title: "Williams Sonoma",
-    category: "Layouts",
-    role: "IMC Campaign",
-    year: "2026",
-    tags: ["Editorial", "Campaign"],
-    summary: "Layout and merchandising study for a retail brand.",
-    assetDir: "william-sonoma",
-    cover: "cover.jpg",
-  },
-  {
-    slug: "nectar",
-    title: "Nectar Energy",
-    category: "Design",
-    role: "Brand Design",
-    year: "2025",
-    tags: ["Business", "Brand"],
-    summary: "Business brand exploration and identity applications.",
-    assetDir: "nectar",
-    cover: "cover.jpg",
-  },
-  {
-    slug: "web101",
-    title: "Website 101 Podcast",
-    category: "Web",
-    role: "Motion Design",
-    year: "2025",
-    tags: ["Web", "Motion"],
-    summary: "Motion for the Website 101 podcast.",
-    assetDir: "web101",
-    cover: "cover.jpg",
-  },
-  {
-    slug: "seneca-spot",
-    title: "Seneca Spot",
-    category: "Apps",
-    role: "Mobile App Design",
-    year: "2024",
-    tags: ["Product", "Pitch"],
-    summary: "Campus experience concept and pitch materials.",
-    assetDir: "seneca-spot",
-    cover: "cover.jpg",
-  },
-];
-
 const FEATURED_ORDER = [
+  "nature-cycle",
+  "hypedocs",
+  "icons",
+  "ford",
   "photography",
   "workday-applicant-framework",
   "william-sonoma",
-  "ford",
   "nectar",
-  "icons",
   "web101",
   "seneca-spot",
-  "hypedocs",
   "yoasobi",
   "the-occult-shop",
   "winter-lodge",
-  "nature-cycle",
 ];
 
 function loadProjectSources(): ProjectInput[] {
-  return [ford, hypedocs, icons, natureCycle, ...LEGACY_COVER_PROJECTS, ...framerProjects];
+  return framerProjects;
 }
 
 function dedupeBySlug(items: ProjectInput[]) {

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { SiteChrome } from "@/components/SiteChrome";
 import { getStaticWorkCategories } from "@/lib/work";
 import { getSiteMarks } from "@/lib/site";
@@ -27,6 +28,13 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <Script id="portfolio-intro-state" strategy="beforeInteractive">
+          {`if (sessionStorage.getItem("portfolio-intro") === "1") {
+            document.documentElement.classList.add("intro-done");
+          } else {
+            document.documentElement.classList.add("intro-start");
+          }`}
+        </Script>
         <SiteChrome workCategories={workCategories} marks={marks}>
           {children}
         </SiteChrome>

@@ -11,12 +11,23 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-export default async function WorkPage() {
+export default async function WorkPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string | string[] }>;
+}) {
   const projects = await getProjects();
+  const requestedCategory = (await searchParams).category;
+  const category = Array.isArray(requestedCategory)
+    ? requestedCategory[0]
+    : requestedCategory;
+  const initialType = projects.some((project) => project.category === category)
+    ? category!
+    : "all";
 
   return (
     <RevealPanel>
-      <WorkView projects={projects} />
+      <WorkView projects={projects} initialType={initialType} />
     </RevealPanel>
   );
 }

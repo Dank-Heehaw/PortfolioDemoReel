@@ -1,6 +1,7 @@
 /**
  * Archive board: category filters and the lightbox.
  * The gallery is a fixed layout, not a draggable field.
+ * Category changes ease outgoing tiles out, then ease the next set in.
  */
 import gsap from "gsap";
 
@@ -51,21 +52,39 @@ export function bindArchivePage(root = document) {
 
   if (!cards.length) return () => {};
 
+  const mosaic = page.querySelector("[data-archive-mosaic]");
   let categoryFilter = "all";
   let activeIndex = 0;
   let viewerOpen = false;
   let scrollLock = false;
+  let disposed = false;
+  let filterTl = null;
 
-  const cardMatches = (card) => categoryFilter === "all" || card.dataset.category === categoryFilter;
+  const cardMatches = (card, filter = categoryFilter) =>
+    filter === "all" || card.dataset.category === filter;
   const visibleCards = () => cards.filter((card) => cardMatches(card));
+
+  const clearCardMotion = (list) => {
+    if (!list.length) return;
+    gsap.set(list, { clearProps: "transform,transformOrigin,opacity,visibility" });
+  };
 
   const layoutPieces = () => {
     let index = 0;
+    const shown = [];
+    const concealed = [];
     cards.forEach((card) => {
       const on = cardMatches(card);
       card.hidden = !on;
-      if (on) index += 1;
+      if (on) {
+        index += 1;
+        shown.push(card);
+      } else {
+        concealed.push(card);
+      }
     });
+    clearCardMotion(shown);
+    clearCardMotion(concealed);
     if (empty) empty.hidden = index > 0;
     layoutSlides();
   };
@@ -145,14 +164,84 @@ export function bindArchivePage(root = document) {
   };
 
   const applyCategoryFilter = (filter) => {
-    categoryFilter = filter || "all";
+    const next = filter || "all";
+    if (next === categoryFilter) return;
+
+    if (filterTl) {
+      filterTl.kill();
+      filterTl = null;
+      gsap.killTweensOf(cards);
+      mosaic?.classList.remove("is-swapping");
+      layoutPieces();
+    }
+
+    const leaving = cards.filter((card) => !card.hidden && !cardMatches(card, next));
+    const staying = cards.filter((card) => !card.hidden && cardMatches(card, next));
+    const entering = cards.filter((card) => card.hidden && cardMatches(card, next));
+    const incoming = staying.concat(entering);
+
+    categoryFilter = next;
     filters.forEach((btn) => {
       const on = btn.dataset.archiveFilter === categoryFilter;
       btn.classList.toggle("is-active", on);
       btn.setAttribute("aria-pressed", String(on));
     });
     activeIndex = 0;
-    layoutPieces();
+    layoutSlides();
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      layoutPieces();
+      return;
+    }
+
+    const tl = gsap.timeline({
+      paused: true,
+      onComplete: () => {
+        filterTl = null;
+        mosaic?.classList.remove("is-swapping");
+        clearCardMotion(cards.filter((card) => !card.hidden));
+      },
+    });
+    filterTl = tl;
+    mosaic?.classList.add("is-swapping");
+
+    if (leaving.length) {
+      tl.to(leaving, {
+        autoAlpha: 0,
+        y: 16,
+        duration: 0.38,
+        ease: "power2.in",
+        stagger: { amount: 0.24, from: "start" },
+        overwrite: "auto",
+      });
+    }
+
+    tl.call(() => {
+      if (disposed) return;
+
+      if (staying.length) gsap.set(staying, { autoAlpha: 0, y: 20 });
+      entering.forEach((card) => {
+        gsap.set(card, { autoAlpha: 0, y: 20 });
+        card.hidden = false;
+      });
+      leaving.forEach((card) => {
+        card.hidden = true;
+      });
+      clearCardMotion(leaving);
+      if (empty) empty.hidden = incoming.length > 0;
+      if (!incoming.length) return;
+
+      tl.to(incoming, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.52,
+        ease: "power3.out",
+        stagger: { amount: 0.32, from: "start" },
+        overwrite: "auto",
+      });
+    });
+
+    tl.play();
   };
 
   const syncFromScroll = () => {
@@ -258,6 +347,14 @@ export function bindArchivePage(root = document) {
   layoutPieces();
 
   return () => {
+    disposed = true;
+    if (filterTl) {
+      filterTl.kill();
+      filterTl = null;
+    }
+    gsap.killTweensOf(cards);
+    clearCardMotion(cards);
+    mosaic?.classList.remove("is-swapping");
     document.body.classList.remove("is-archive-viewer");
     if (viewer) gsap.killTweensOf(viewer);
     cleanups.forEach((fn) => fn());

@@ -1,11 +1,13 @@
-# Project media + case studies
+# Project media
 
-Case-study **copy** can live in `content/projects/{slug}.js` as a fallback.
-**Images and video belong in Directus**, not this folder.
+Project content and uploaded image assets are managed in the Sanity Studio at
+`/studio`. Imported projects are drafts until reviewed and published.
 
-1. Upload cover / gallery / video in Directus (Content → projects).
-2. The site reads `{DIRECTUS_URL}/assets/{file-id}`.
-3. Production file bytes: Cloudflare R2 — see `docs/directus-media.md`.
+The local project catalog in `src/content/projects/framer.ts` remains the
+frontend fallback until the Sanity drafts are ready to publish. Keep local media
+that is still referenced by the site; videos should use hosted URLs rather than
+Sanity file assets.
 
-Do not git-add `Ford`, `Hypedocs`, `Icons`, `NatureCycle`, or `*.mp4`.
-You can delete local copies after they are in the CMS File Library.
+To import new catalog entries as drafts, authenticate the Sanity CLI and run
+`npx sanity exec scripts/migrate-projects-to-sanity.ts --with-user-token -- --apply`
+from the repository root. Existing project slugs are skipped.

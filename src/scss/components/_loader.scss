@@ -9,6 +9,7 @@ html.intro-done .loader {
   --loader-x: 50%;
   --loader-y: 50%;
   --loader-grid-size: 3.25rem;
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -225,6 +226,10 @@ html.intro-done .loader {
     will-change: transform;
     pointer-events: none;
   }
+}
+
+html.intro-start .loader {
+  display: block;
 }
 
 @keyframes loader-cursor {

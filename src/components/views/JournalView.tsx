@@ -6,13 +6,17 @@ function formatTopicLine(tags: string[] = []) {
   return tags.join(" · ");
 }
 
-function EditorialCard({ post }: { post: JournalPost }) {
+function padIndex(index: number) {
+  return String(index + 1).padStart(2, "0");
+}
+
+function JournalRow({ post, index }: { post: JournalPost; index: number }) {
   const href = journalPostPath(post);
   const external = Boolean(post.externalUrl);
   const topics = formatTopicLine(post.tags);
 
   return (
-    <article className={`archive-card${external ? " archive-card--external" : ""}`} data-reveal>
+    <li className={`archive-card${external ? " archive-card--external" : ""}`}>
       <a
         className="archive-card__link"
         href={href}
@@ -29,21 +33,34 @@ function EditorialCard({ post }: { post: JournalPost }) {
             External site
           </span>
         ) : null}
-        <h2 className="archive-card__title">{post.title}</h2>
-        <div className="archive-card__meta">
-          <div className="archive-card__meta-start">
+        <span className="archive-card__copy">
+          <span className="archive-card__title-line">
+            <span className="archive-card__index" aria-hidden="true">
+              {padIndex(index)}
+            </span>
+            <h2 className="archive-card__title">{post.title}</h2>
+          </span>
+          <p className="archive-card__meta">
             <span className="archive-card__tag">{post.category}</span>
-            {topics ? <p className="archive-card__topics">{topics}</p> : null}
-          </div>
-          <time className="archive-card__date" {...(post.dateISO ? { dateTime: post.dateISO } : {})}>
-            {post.dateLabel}
-          </time>
-        </div>
-        <div className="archive-card__media">
-          <img src={post.cover} alt="" loading="lazy" width={1200} height={750} />
-        </div>
+            {topics ? <span className="archive-card__topics">{topics}</span> : null}
+            <time
+              className="archive-card__date"
+              {...(post.dateISO ? { dateTime: post.dateISO } : {})}
+            >
+              {post.dateLabel}
+            </time>
+          </p>
+          {post.summary ? <p className="archive-card__summary">{post.summary}</p> : null}
+        </span>
+        {post.cover ? (
+          <span className="archive-card__media">
+            <img src={post.cover} alt="" loading="lazy" width={112} height={76} />
+          </span>
+        ) : (
+          <span className="archive-card__media archive-card__media--empty" aria-hidden="true" />
+        )}
       </a>
-    </article>
+    </li>
   );
 }
 
@@ -51,15 +68,15 @@ export function JournalView({ posts }: { posts: JournalPost[] }) {
   return (
     <div className="site-page site-page--archive">
       <Container>
-        <section className="archive-section" data-reveal>
-          <header className="archive-section__head">
+        <section className="archive-section">
+          <header className="archive-section__head" data-reveal>
             <h1 className="archive-section__title">Journal</h1>
           </header>
-          <div className="archive-grid">
-            {posts.map((post) => (
-              <EditorialCard key={post.slug} post={post} />
+          <ol className="archive-grid" data-reveal-stagger>
+            {posts.map((post, index) => (
+              <JournalRow key={post.slug} post={post} index={index} />
             ))}
-          </div>
+          </ol>
         </section>
       </Container>
     </div>
