@@ -430,3 +430,19 @@
     grid-column: 1 / -1;
   }
 }
+
+@media (min-width: 720px) and (max-width: 899px) {
+  .contact-stage {
+    gap: clamp(1.25rem, 3vw, 2rem);
+    padding-block: 2rem 1.5rem;
+  }
+
+  .contact-stage__display {
+    font-size: clamp(3.4rem, 8vw, 4.8rem);
+  }
+
+  .contact-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem 1.5rem;
+  }
+}

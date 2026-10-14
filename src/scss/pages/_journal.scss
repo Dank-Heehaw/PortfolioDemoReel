@@ -343,7 +343,7 @@
   gap: clamp(1rem, 2.5vw, 1.5rem);
   padding: clamp(1rem, 2.5vw, 1.5rem) 0 clamp(1.5rem, 3vw, 2rem);
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: 1fr;
     gap: clamp(1.25rem, 2.5vw, 2rem);
@@ -358,7 +358,7 @@
   gap: clamp(0.75rem, 2vw, 1.25rem);
   align-content: center;
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     container-type: inline-size;
     padding-left: clamp(0.25rem, 1vw, 0.75rem);
   }
@@ -404,7 +404,7 @@
   gap: clamp(0.65rem, 1.6vw, 1rem);
   max-width: min(100%, 26em);
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     gap: clamp(0.75rem, 2cqi, 1.15rem);
     width: 100%;
     max-width: none;
@@ -420,7 +420,7 @@
   text-transform: uppercase;
   text-wrap: balance;
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     font-size: clamp(2.5rem, 11cqi, 5rem);
     letter-spacing: -0.038em;
     line-height: 0.92;
@@ -435,7 +435,7 @@
   border: none;
   border-top: 1px solid var(--ink);
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     width: min(100%, 36ch);
   }
 }
@@ -449,7 +449,7 @@
   line-height: 1.25;
 
   .archive-article__hero-headline & {
-    @media (min-width: 900px) {
+    @media (min-width: 1024px) {
       max-width: none;
       font-size: clamp(1.2rem, 4.2cqi, 2rem);
       line-height: 1.15;
@@ -467,7 +467,7 @@
   .archive-article__hero-headline & {
     max-width: none;
 
-    @media (min-width: 900px) {
+    @media (min-width: 1024px) {
       font-size: clamp(0.85rem, 2.2cqi, 1rem);
       line-height: 1.45;
       white-space: nowrap;
@@ -500,7 +500,7 @@
     object-position: center 28%;
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     width: 100%;
     max-width: none;
     margin: 0;
@@ -655,7 +655,7 @@
   padding: clamp(1.8rem, 4vw, 3.1rem) 0;
   border-top: 1px solid rgba($ink, 0.14);
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
     grid-template-areas: "media copy";
     column-gap: var(--article-split-gap);
@@ -664,7 +664,7 @@
 }
 
 .archive-article__split--flip {
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
     grid-template-areas: "copy media";
   }
@@ -678,7 +678,7 @@
   align-content: start;
   align-self: start;
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     max-width: min(36rem, 100%);
   }
 
@@ -692,7 +692,7 @@
 }
 
 .archive-article__split--flip .archive-article__split-copy {
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     justify-self: start;
   }
 }
@@ -721,7 +721,7 @@
     aspect-ratio: auto;
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     position: relative;
     align-self: stretch;
     min-height: 0;

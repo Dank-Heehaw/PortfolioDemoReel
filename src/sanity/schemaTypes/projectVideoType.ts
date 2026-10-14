@@ -9,8 +9,8 @@ export const projectVideoType = defineType({
   fields: [
     defineField({
       name: 'src',
-      title: 'Video URL',
-      description: 'Use a hosted video URL; do not upload video files to Sanity.',
+      title: 'YouTube or video URL',
+      description: 'Paste a YouTube link or hosted video URL. Do not upload video files to Sanity.',
       type: 'url',
       validation: (rule) => rule.uri({scheme: ['http', 'https']}),
     }),

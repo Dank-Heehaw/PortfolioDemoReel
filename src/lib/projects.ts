@@ -11,6 +11,7 @@ import ford from "@/content/projects/ford";
 import hypedocs from "@/content/projects/hypedocs";
 import icons from "@/content/projects/icons";
 import natureCycle from "@/content/projects/nature-cycle";
+import { framerProjects } from "@/content/projects/framer";
 
 export type ProjectInput = {
   slug: string;
@@ -24,11 +25,17 @@ export type ProjectInput = {
   featured?: boolean;
   moreWork?: boolean;
   sort?: number;
+  designer?: string;
+  contribution?: string;
+  nextProjectSlug?: string;
+  prototypeUrl?: string;
   assetDir?: string;
   cover?: string;
   hero?: string;
+  software?: string[] | string;
   devices?: Array<{ src: string; label?: string }>;
   video?: { src: string; poster?: string; label?: string } | null;
+  shortVideo?: { src: string; poster?: string; label?: string } | null;
   gallery?: Array<string | { src: string; alt?: string; layout?: string }>;
 };
 
@@ -44,11 +51,17 @@ export type Project = {
   featured: boolean;
   moreWork?: boolean;
   sort: number | null;
+  designer: string;
+  contribution: string;
+  nextProjectSlug: string;
+  prototypeUrl: string;
   assetDir: string;
   cover: string;
   hero: string;
+  software: string[];
   devices: Array<{ src: string; label: string }>;
   video: { src: string; poster: string; label: string } | null;
+  shortVideo: { src: string; poster: string; label: string } | null;
   gallery: Array<{ src: string; alt: string; layout: "half" | "full" }>;
   hasCaseStudy: boolean;
 };
@@ -130,15 +143,22 @@ function normalizeProject(raw: ProjectInput, fileSlug = ""): Project | null {
     featured: Boolean(raw.featured),
     moreWork: raw.moreWork,
     sort: Number.isFinite(Number(raw.sort)) ? Number(raw.sort) : null,
+    designer: raw.designer || "",
+    contribution: raw.contribution || "",
+    nextProjectSlug: raw.nextProjectSlug || "",
+    prototypeUrl: raw.prototypeUrl || "",
     assetDir,
     cover: projectAsset(assetDir, coverFile),
     hero: projectAsset(assetDir, heroFile),
+    software: asStringList(raw.software),
     devices: normalizeDevices(raw.devices, assetDir),
     video: normalizeVideo(raw.video, assetDir),
+    shortVideo: normalizeVideo(raw.shortVideo, assetDir),
     gallery: normalizeGallery(raw.gallery, assetDir),
     hasCaseStudy: Boolean(
       (raw.gallery && raw.gallery.length) ||
         raw.video ||
+        raw.shortVideo ||
         raw.body ||
         (raw.devices && raw.devices.length)
     ),
@@ -156,7 +176,16 @@ const LEGACY_COVER_PROJECTS: ProjectInput[] = [
     tags: ["Motion", "Festival"],
     summary: "Motion design for TIFF-related work.",
     assetDir: "motion-design",
-    cover: "cover.jpg",
+    cover: "tiff-2026-cover.jpg",
+    software: ["Adobe After Effects", "Blender", "Adobe Premiere Pro"],
+    video: {
+      src: "https://youtu.be/F0Hzpv6ZtyM?si=rNHOWqClXTMvwtjX",
+      label: "TIFF 2026 Film",
+    },
+    shortVideo: {
+      src: "https://youtube.com/shorts/C3YLQvYCXz4?si=zOopFCeonGDDOoOh",
+      label: "TIFF 2026 Short",
+    },
   },
   {
     slug: "william-sonoma",
@@ -221,15 +250,23 @@ const FEATURED_ORDER = [
   "icons",
   "ford",
   "motion design",
+  "photography",
+  "workday-applicant-framework",
   "william-sonoma",
+  "ford",
   "nectar",
+  "icons",
   "web101",
   "seneca-spot",
-  "the-occult-shop"
+  "hypedocs",
+  "yoasobi",
+  "the-occult-shop",
+  "winter-lodge",
+  "nature-cycle",
 ];
 
 function loadProjectSources(): ProjectInput[] {
-  return [ford, hypedocs, icons, natureCycle, ...LEGACY_COVER_PROJECTS];
+  return [ford, hypedocs, icons, natureCycle, ...LEGACY_COVER_PROJECTS, ...framerProjects];
 }
 
 function dedupeBySlug(items: ProjectInput[]) {
@@ -284,11 +321,17 @@ export const getProjects = cache(async function getProjects() {
       featured: rawProject.featured ?? localProject?.featured,
       moreWork: rawProject.moreWork ?? localProject?.moreWork,
       sort: rawProject.sort ?? localProject?.sort ?? undefined,
+      designer: rawProject.designer || localProject?.designer,
+      contribution: rawProject.contribution || localProject?.contribution,
+      nextProjectSlug: rawProject.nextProjectSlug || localProject?.nextProjectSlug,
+      prototypeUrl: rawProject.prototypeUrl || localProject?.prototypeUrl,
       assetDir: rawProject.assetDir || localProject?.assetDir,
       cover: rawProject.cover || localProject?.cover,
       hero: rawProject.hero || localProject?.hero,
+      software: rawProject.software?.length ? rawProject.software : localProject?.software,
       devices: rawProject.devices?.length ? rawProject.devices : localProject?.devices,
       video: rawProject.video || localProject?.video,
+      shortVideo: rawProject.shortVideo || localProject?.shortVideo,
       gallery: rawProject.gallery?.length ? rawProject.gallery : localProject?.gallery,
     });
     if (project) projectsBySlug.set(project.slug, project);
