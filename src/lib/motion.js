@@ -488,7 +488,6 @@ export function bindSiteNav(root = document) {
   const animateCloseFromWorkAll = () => {
     if (!workPanel || !workRow) return animateCloseGeneric();
 
-    setCardTransitions(false);
     workRow.classList.add("is-selecting");
 
     const selectedText = gsap.utils.toArray(".reveal-line__inner", workRow);
@@ -510,14 +509,6 @@ export function bindSiteNav(root = document) {
         workCats,
         { y: -36, autoAlpha: 0, stagger: 0.045, duration: 0.48, ease: "power3.in" },
         0
-      );
-    }
-
-    if (workCards.length) {
-      tl.to(
-        workCards,
-        { y: -52, autoAlpha: 0, stagger: 0.05, duration: 0.52, ease: "power3.in" },
-        0.04
       );
     }
 
@@ -548,39 +539,13 @@ export function bindSiteNav(root = document) {
   const workRow = menu.querySelector("[data-menu-work]");
   const workPanel = menu.querySelector("[data-menu-work-panel]");
   const workCats = gsap.utils.toArray("[data-work-cat]", menu);
-  const workCards = gsap.utils.toArray("[data-work-card]", menu);
   const workCta = workPanel?.querySelector(".nav-menu__work-cta");
-  const workBits = [...workCats, ...workCards, workCta].filter(Boolean);
-  const workPreviewLayers = workPanel
-    ? gsap.utils.toArray("[data-work-preview-layer]", workPanel)
-    : [];
-  let workPreviewFront = 0;
-  let workPreviewSrc = "";
-  let workPreviewTarget = "";
-  let workPreviewToken = 0;
-  let workPreviewPending = false;
+  const workBits = [...workCats, workCta].filter(Boolean);
   let workPanelOpen = false;
-
-  if (workPreviewLayers.length) {
-    gsap.set(workPreviewLayers, { autoAlpha: 0, scale: 1, y: 0 });
-    workCats.forEach((cat) => {
-      const src = cat.dataset.workCover;
-      if (!src) return;
-      const preload = new Image();
-      preload.decoding = "async";
-      preload.src = src;
-    });
-  }
 
   const workIndex = workRow ? rows.indexOf(workRow) : -1;
   const aboveRows = workIndex > 0 ? rows.slice(0, workIndex) : [];
   const belowRows = workIndex >= 0 ? rows.slice(workIndex + 1) : [];
-
-  const setCardTransitions = (enabled) => {
-    workCards.forEach((card) => {
-      card.style.transition = enabled ? "" : "none";
-    });
-  };
 
   const setOffscreenRows = (hidden) => {
     [...aboveRows, ...belowRows].forEach((row) => {
@@ -602,7 +567,6 @@ export function bindSiteNav(root = document) {
   const resetWorkLayout = () => {
     applyWorkOpenState(false);
     workRow?.classList.remove("is-selecting");
-    setCardTransitions(true);
     if (workPanel) {
       workPanel.hidden = true;
       gsap.set(workPanel, { clearProps: "all" });
@@ -611,7 +575,6 @@ export function bindSiteNav(root = document) {
       clearProps: "flexGrow,flexBasis,flexShrink,minHeight,maxHeight,height,y,yPercent,autoAlpha,opacity,visibility",
     });
     if (workBits.length) gsap.set(workBits, { clearProps: "all" });
-    resetWorkPreview();
   };
 
   const snapCloseWorkPanel = () => {
@@ -620,154 +583,10 @@ export function bindSiteNav(root = document) {
       workTl = null;
     }
     gsap.killTweensOf(
-      [workPanel, workRow, ...aboveRows, ...belowRows, ...workBits, ...workPreviewLayers].filter(Boolean)
+      [workPanel, workRow, ...aboveRows, ...belowRows, ...workBits].filter(Boolean)
     );
     resetWorkLayout();
   };
-
-  const syncActiveCardAlign = (id = "") => {
-    const body = workPanel?.querySelector(".nav-menu__work-body");
-    const activeCat = workCats.find((btn) => btn.dataset.workCat === id);
-    const activeCard = workCards.find((card) => card.dataset.workCard === id);
-    if (!body || !activeCat || !activeCard || reduce) return;
-
-    const bodyRect = body.getBoundingClientRect();
-    const catRect = activeCat.getBoundingClientRect();
-    const cardRect = activeCard.getBoundingClientRect();
-    const targetY =
-      catRect.top - bodyRect.top + catRect.height * 0.5 - (cardRect.top - bodyRect.top + cardRect.height * 0.5);
-
-    gsap.to(activeCard, {
-      marginTop: targetY,
-      duration: 0.55,
-      ease: "power3.out",
-      overwrite: "auto",
-    });
-
-    workCards.forEach((card) => {
-      if (card === activeCard) return;
-      gsap.to(card, { marginTop: 0, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-    });
-  };
-
-  /** Drop the cover crossfade back to a hidden resting state. */
-  function resetWorkPreview() {
-    workPreviewToken += 1;
-    workPreviewPending = false;
-    workPreviewSrc = "";
-    workPreviewTarget = "";
-    workPreviewFront = 0;
-    if (!workPreviewLayers.length) return;
-    gsap.killTweensOf(workPreviewLayers);
-    gsap.set(workPreviewLayers, { autoAlpha: 0, scale: 1, y: 0 });
-  }
-
-  /**
-   * Crossfade the work-panel cover. The current layer stays up until the next
-   * image has decoded, then opacity and a short transform hand off.
-   */
-  function showWorkCover(src, { immediate = false } = {}) {
-    if (workPreviewLayers.length < 2 || !src) return;
-    if (src === workPreviewTarget) return;
-    workPreviewTarget = src;
-
-    const token = ++workPreviewToken;
-    let incoming;
-    let outgoing;
-
-    if (workPreviewPending) {
-      incoming = workPreviewLayers[workPreviewFront];
-      outgoing = workPreviewLayers[(workPreviewFront + 1) % 2];
-    } else {
-      const incomingIndex = (workPreviewFront + 1) % 2;
-      workPreviewFront = incomingIndex;
-      workPreviewPending = true;
-      incoming = workPreviewLayers[incomingIndex];
-      outgoing = workPreviewLayers[(incomingIndex + 1) % 2];
-    }
-
-    const motionOff =
-      immediate || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const reveal = () => {
-      if (token !== workPreviewToken) return;
-      workPreviewPending = false;
-      workPreviewSrc = src;
-      workPreviewTarget = src;
-
-      if (motionOff) {
-        gsap.killTweensOf(workPreviewLayers);
-        gsap.set(incoming, { autoAlpha: 1, scale: 1, y: 0 });
-        gsap.set(outgoing, { autoAlpha: 0, scale: 1, y: 0 });
-        return;
-      }
-
-      gsap.killTweensOf([incoming, outgoing]);
-      gsap.fromTo(
-        incoming,
-        { autoAlpha: 0, scale: 1.045, y: 14 },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power3.out",
-          overwrite: "auto",
-        }
-      );
-      gsap.to(outgoing, {
-        autoAlpha: 0,
-        scale: 0.985,
-        y: -10,
-        duration: 0.38,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    };
-
-    const fail = () => {
-      if (token !== workPreviewToken) return;
-      workPreviewPending = false;
-      workPreviewTarget = workPreviewSrc;
-      const outgoingIndex = workPreviewLayers.indexOf(outgoing);
-      workPreviewFront = outgoingIndex >= 0 ? outgoingIndex : 0;
-    };
-
-    const ready = () => {
-      if (token !== workPreviewToken) return;
-      const decoded = incoming.decode?.();
-      if (decoded && typeof decoded.then === "function") {
-        decoded.then(reveal).catch(reveal);
-        return;
-      }
-      reveal();
-    };
-
-    if (incoming.getAttribute("src") === src && incoming.complete) {
-      if (incoming.naturalWidth) ready();
-      else fail();
-      return;
-    }
-
-    const onLoad = () => {
-      incoming.removeEventListener("load", onLoad);
-      incoming.removeEventListener("error", onError);
-      ready();
-    };
-    const onError = () => {
-      incoming.removeEventListener("load", onLoad);
-      incoming.removeEventListener("error", onError);
-      fail();
-    };
-    incoming.addEventListener("load", onLoad);
-    incoming.addEventListener("error", onError);
-    incoming.setAttribute("src", src);
-  }
-
-  function revealActiveCover() {
-    const active = workCats.find((btn) => btn.classList.contains("is-active")) || workCats[0];
-    showWorkCover(active?.dataset.workCover || "", { immediate: reduce });
-  }
 
   const setOpen = (open, { origin = null, fromWorkPanel = false } = {}) => {
     // Already at (or heading to) this state — ignore duplicate requests.
@@ -816,7 +635,6 @@ export function bindSiteNav(root = document) {
     if (workTl && workTl.reversed()) {
       applyWorkOpenState(true);
       workPanel.hidden = false;
-      revealActiveCover();
       workTl.play();
       return;
     }
@@ -828,9 +646,7 @@ export function bindSiteNav(root = document) {
 
     applyWorkOpenState(true);
     workPanel.hidden = false;
-    setCardTransitions(false);
     gsap.set(workPanel, { autoAlpha: 1, overflow: "hidden" });
-    revealActiveCover();
 
     if (reduce) {
       gsap.set(aboveRows, { flexGrow: 0.001, flexBasis: 0, minHeight: 0, autoAlpha: 0, y: -menuHeight });
@@ -845,7 +661,6 @@ export function bindSiteNav(root = document) {
       });
       gsap.set(workPanel, { flexGrow: 1, flexShrink: 1, flexBasis: "0%", minHeight: 0, autoAlpha: 1 });
       gsap.set(workBits, { y: 0, autoAlpha: 1 });
-      setCardTransitions(true);
       return;
     }
 
@@ -856,7 +671,6 @@ export function bindSiteNav(root = document) {
 
     workTl = gsap.timeline({
       defaults: { ease: "power3.inOut", overwrite: "auto" },
-      onComplete: () => setCardTransitions(true),
       onReverseComplete: () => {
         resetWorkLayout();
         workTl = null;
@@ -927,15 +741,6 @@ export function bindSiteNav(root = document) {
       );
     }
 
-    if (workCards.length) {
-      workTl.fromTo(
-        workCards,
-        { y: 120 },
-        { y: 0, stagger: 0.08, duration: 0.75, ease: "power3.out" },
-        0.22
-      );
-    }
-
     if (workCta) {
       workTl.fromTo(
         workCta,
@@ -945,12 +750,6 @@ export function bindSiteNav(root = document) {
       );
     }
 
-    if (workCats.length) {
-      const activeCat = workCats.find((btn) => btn.classList.contains("is-active"));
-      if (activeCat) {
-        workTl.call(() => syncActiveCardAlign(activeCat.dataset.workCat || ""), null, 0.72);
-      }
-    }
   };
 
   /** Return from Work drill-down to the primary route list. */
@@ -959,28 +758,11 @@ export function bindSiteNav(root = document) {
     if (workTl?.reversed()) return;
 
     if (workTl && workTl.progress() > 0) {
-      setCardTransitions(false);
       workTl.reverse();
       return;
     }
 
     if (workPanelOpen) resetWorkLayout();
-  };
-
-  /** Highlight a work category and swap the featured 3D card on the right. */
-  const setWorkCategory = (id = "") => {
-    workCats.forEach((btn) => {
-      const on = btn.dataset.workCat === id;
-      btn.classList.toggle("is-active", on);
-      if (on) btn.setAttribute("aria-current", "true");
-      else btn.removeAttribute("aria-current");
-    });
-    workCards.forEach((card) => {
-      card.classList.toggle("is-active", card.dataset.workCard === id);
-    });
-    syncActiveCardAlign(id);
-    const activeCat = workCats.find((btn) => btn.dataset.workCat === id);
-    showWorkCover(activeCat?.dataset.workCover || "");
   };
 
   const closeMenu = (origin = null, { fromWorkPanel = false } = {}) => {
@@ -1018,7 +800,6 @@ export function bindSiteNav(root = document) {
 
     const workCat = event.target.closest("[data-work-cat]");
     if (workCat) {
-      setWorkCategory(workCat.dataset.workCat || "");
       if (workCat.closest("[data-menu-close]")) return;
       event.preventDefault();
       return;
@@ -1053,15 +834,8 @@ export function bindSiteNav(root = document) {
     });
   };
 
-  const onWorkResize = () => {
-    if (!workPanelOpen) return;
-    const activeCat = workCats.find((btn) => btn.classList.contains("is-active"));
-    if (activeCat) syncActiveCardAlign(activeCat.dataset.workCat || "");
-  };
-
   const onResize = () => {
     setNavHeight();
-    onWorkResize();
   };
   window.addEventListener("resize", onResize, { passive: true });
 
@@ -1073,21 +847,7 @@ export function bindSiteNav(root = document) {
   mark?.addEventListener("focus", onMarkEnter);
   mark?.addEventListener("blur", onMarkLeave);
 
-  const onWorkCatOver = (event) => {
-    const cat = event.target.closest("[data-work-cat]");
-    if (!cat || !menu.contains(cat)) return;
-    setWorkCategory(cat.dataset.workCat || "");
-  };
-
-  const onWorkCatFocus = (event) => {
-    const cat = event.target.closest("[data-work-cat]");
-    if (!cat || !menu.contains(cat)) return;
-    setWorkCategory(cat.dataset.workCat || "");
-  };
-
   root.addEventListener("click", onClick);
-  menu.addEventListener("pointerover", onWorkCatOver);
-  menu.addEventListener("focusin", onWorkCatFocus);
   menu.addEventListener("close", onMenuCloseEvent);
   window.addEventListener("keydown", onKey);
 
@@ -1099,11 +859,7 @@ export function bindSiteNav(root = document) {
     window.removeEventListener("resize", onResize);
     window.removeEventListener("keydown", onKey);
     root.removeEventListener("click", onClick);
-    menu.removeEventListener("pointerover", onWorkCatOver);
-    menu.removeEventListener("focusin", onWorkCatFocus);
     menu.removeEventListener("close", onMenuCloseEvent);
-    workPreviewToken += 1;
-    if (workPreviewLayers.length) gsap.killTweensOf(workPreviewLayers);
     if (workPanelOpen || workTl) snapCloseWorkPanel();
     stopMenuAnimation();
     document.body.classList.remove("is-menu-open", "is-menu-work");

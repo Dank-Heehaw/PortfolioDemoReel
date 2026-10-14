@@ -31,6 +31,8 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
         <Script id="portfolio-intro-state" strategy="beforeInteractive">
           {`if (sessionStorage.getItem("portfolio-intro") === "1") {
             document.documentElement.classList.add("intro-done");
+          } else {
+            document.documentElement.classList.add("intro-start");
           }`}
         </Script>
         <SiteChrome workCategories={workCategories} marks={marks}>

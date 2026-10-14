@@ -8,11 +8,13 @@ import type { Project } from "@/lib/projects";
 export function ProjectList({
   projects,
   limit,
+  initialType = "all",
 }: {
   projects: Project[];
   limit?: number;
+  initialType?: string;
 }) {
-  const [activeType, setActiveType] = useState("all");
+  const [activeType, setActiveType] = useState(initialType);
   const filtersRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLSpanElement>(null);
   const hasPositionedIndicator = useRef(false);

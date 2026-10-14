@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { MenuIcon } from "@/components/MenuIcons";
 import { MENU, type MenuItem } from "@/lib/routes";
-import { projectPath } from "@/lib/paths";
 import type { WorkCategory } from "@/lib/work";
 
 function MenuRowInner({
@@ -78,12 +78,6 @@ function MenuRow({ item, current }: { item: MenuItem; current: string }) {
 function WorkPanel({ workCategories }: { workCategories: WorkCategory[] }) {
   return (
     <div className="nav-menu__work" id="site-menu-work" data-menu-work-panel hidden>
-      <figure className="nav-menu__work-preview" data-work-preview aria-hidden="true">
-        <span className="nav-menu__work-preview-frame">
-          <img alt="" data-work-preview-layer draggable={false} decoding="async" />
-          <img alt="" data-work-preview-layer draggable={false} decoding="async" />
-        </span>
-      </figure>
       <div className="nav-menu__work-head" aria-hidden="true">
         <p className="nav-menu__work-eyebrow">Selected</p>
         <h2 className="nav-menu__work-title">Work</h2>
@@ -93,24 +87,35 @@ function WorkPanel({ workCategories }: { workCategories: WorkCategory[] }) {
       </div>
 
       <nav className="nav-menu__work-cats" aria-label="Work categories">
-        {workCategories.map((cat, index) => (
-          <a
-            key={cat.id}
-            className={`nav-menu__work-cat nav-menu__row--left${index === 0 ? " is-active" : ""}`}
-            href={projectPath(cat.projectSlug)}
-            data-work-cat={cat.id}
-            data-work-cover={cat.cover}
-            data-work-slug={cat.projectSlug}
-            data-nav
-            data-menu-close
-            aria-current={index === 0 ? true : undefined}
-          >
-            <MenuRowInner align="left" label={cat.label} meta={cat.meta} />
-          </a>
+        {workCategories.map((cat) => (
+          <div key={cat.id} className="nav-menu__work-cat" data-work-cat={cat.id}>
+            <Link
+              className="nav-menu__work-category"
+              href={`/work?category=${encodeURIComponent(cat.indexCategory)}`}
+              data-nav
+              data-menu-close
+            >
+              <MenuRowInner align="left" label={cat.label} meta={cat.meta} />
+            </Link>
+            <ul className="nav-menu__featured-projects" aria-label={`Featured ${cat.label} projects`}>
+              {cat.featuredProjects.map((project) => (
+                <li key={project.slug}>
+                  <Link
+                    className="nav-menu__featured-project"
+                    href={`/work?category=${encodeURIComponent(project.category)}`}
+                    data-nav
+                    data-menu-close
+                  >
+                    {project.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
       </nav>
 
-      <a
+      <Link
         className="nav-menu__work-cta nav-menu__row--left"
         href="/work"
         data-nav
@@ -118,7 +123,7 @@ function WorkPanel({ workCategories }: { workCategories: WorkCategory[] }) {
         data-menu-work-all
       >
         <MenuRowInner align="left" label="View all work" meta="Full index" />
-      </a>
+      </Link>
     </div>
   );
 }

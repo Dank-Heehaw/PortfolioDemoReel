@@ -17,7 +17,6 @@ import { SiteMenu } from "@/components/SiteMenu";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteLoader } from "@/components/SiteLoader";
 import { MENU, menuCurrentFor, normalizePath, routeIdFromPath, shouldShowFooter } from "@/lib/routes";
-import { projectPath } from "@/lib/paths";
 import { syncNavTheme } from "@/lib/navTheme";
 import type { WorkCategory } from "@/lib/work";
 import type { SiteMarks } from "@/lib/site";
@@ -61,7 +60,7 @@ export function SiteChrome({
     let cancelled = false;
 
     const waitForRoute = (target: string) => {
-      const wanted = normalizePath(target);
+      const wanted = normalizePath(new URL(target, window.location.origin).pathname);
       if (normalizePath(pathnameRef.current) === wanted) return Promise.resolve();
       return new Promise<void>((resolve) => {
         const started = performance.now();
@@ -86,10 +85,15 @@ export function SiteChrome({
       event.preventDefault();
       if (root.dataset.navPending === "1") return;
 
-      const nextPath = normalizePath(href);
+      const nextUrl = new URL(href, window.location.origin);
+      const nextPath = normalizePath(nextUrl.pathname);
       const samePage = nextPath === normalizePath(window.location.pathname);
+      const sameUrl =
+        samePage &&
+        nextUrl.search === window.location.search &&
+        nextUrl.hash === window.location.hash;
       const menuWasOpen = document.body.classList.contains("is-menu-open");
-      if (samePage && !menuWasOpen) return;
+      if (sameUrl && !menuWasOpen) return;
 
       root.dataset.navPending = "1";
       const site = root.querySelector("[data-site]");
@@ -108,7 +112,7 @@ export function SiteChrome({
       const delay = fromWorkPanel ? 0.42 : menuWasOpen ? 0.32 : nextPath === "/" ? 0.12 : 0;
       document.documentElement.dataset.revealDelay = String(delay);
 
-      if (!samePage) router.push(href);
+      if (!sameUrl) router.push(href);
 
       try {
         const motion = await import("@/lib/motion.js");
@@ -155,12 +159,18 @@ export function SiteChrome({
         const alreadyPlayed = window.sessionStorage.getItem("portfolio-intro") === "1";
         if (loader && !alreadyPlayed) {
           window.sessionStorage.setItem("portfolio-intro", "1");
+          document.documentElement.classList.add("intro-start");
           motion.runIntro({
             loader,
             page: pageRef.current,
-            onDone: () => document.documentElement.classList.add("intro-done"),
+            onDone: () => {
+              document.documentElement.classList.remove("intro-start");
+              document.documentElement.classList.add("intro-done");
+            },
           });
         } else if (loader) {
+          document.documentElement.classList.remove("intro-start");
+          document.documentElement.classList.add("intro-done");
           loader.setAttribute("aria-busy", "false");
           (loader as HTMLElement).style.display = "none";
         }
@@ -184,7 +194,12 @@ export function SiteChrome({
 
   useEffect(() => {
     for (const item of MENU) router.prefetch(item.path);
-    for (const cat of workCategories) router.prefetch(projectPath(cat.projectSlug));
+    for (const cat of workCategories) {
+      router.prefetch(`/work?category=${encodeURIComponent(cat.indexCategory)}`);
+      for (const project of cat.featuredProjects) {
+        router.prefetch(`/work?category=${encodeURIComponent(project.category)}`);
+      }
+    }
   }, [router, workCategories]);
 
   const navTheme =

@@ -4,15 +4,15 @@
  */
 
 import { cache } from "react";
-import { encodeAssetPath, mediaUrl } from "./media";
+import type { Project } from "./projects";
 import { getLocalProjects, getProjects } from "./projects";
 
 export type WorkCategory = {
   id: string;
   label: string;
   meta: string;
-  cover: string;
-  projectSlug: string;
+  indexCategory: string;
+  featuredProjects: Pick<Project, "slug" | "title" | "category">[];
 };
 
 const WORK_CATEGORY_DEFS = [
@@ -20,41 +20,45 @@ const WORK_CATEGORY_DEFS = [
     id: "ui-ux",
     label: "UI/UX",
     meta: "Product & interfaces",
-    projectSlug: "nature-cycle",
+    indexCategory: "UX Case Study",
+    featuredSlugs: ["nature-cycle", "workday-applicant-framework"],
   },
   {
     id: "branding",
     label: "Branding",
     meta: "Identity systems",
-    projectSlug: "hypedocs",
+    indexCategory: "Brand Design",
+    featuredSlugs: ["hypedocs", "nectar"],
   },
   {
     id: "motion",
     label: "Motion",
     meta: "Animations VFX",
-    projectSlug: "icons",
+    indexCategory: "Motion Design",
+    featuredSlugs: ["photography", "web101"],
   },
   {
     id: "campaigns",
     label: "Campaigns",
     meta: "Integrated work",
-    projectSlug: "ford",
+    indexCategory: "IMC Campaign",
+    featuredSlugs: ["ford", "william-sonoma"],
   },
 ] as const;
 
-function categoriesFrom(projects: { slug: string; cover: string }[]): WorkCategory[] {
-  return WORK_CATEGORY_DEFS.map((item) => {
-    const project = projects.find((entry) => entry.slug === item.projectSlug);
-    return {
-      ...item,
-      cover:
-        project?.cover ||
-        mediaUrl(encodeAssetPath(`/projects/${item.projectSlug}/cover.jpg`)),
-    };
-  });
+function categoriesFrom(projects: Project[]): WorkCategory[] {
+  return WORK_CATEGORY_DEFS.map(({ featuredSlugs, ...category }) => ({
+    ...category,
+    featuredProjects: featuredSlugs.flatMap((slug) => {
+      const project = projects.find((entry) => entry.slug === slug);
+      return project
+        ? [{ slug: project.slug, title: project.title, category: project.category }]
+        : [];
+    }),
+  }));
 }
 
-/** Sync catalog for the site shell so navigation is not blocked on Payload. */
+/** Sync catalog for the site shell so navigation does not wait on Sanity. */
 export function getStaticWorkCategories(): WorkCategory[] {
   return categoriesFrom(getLocalProjects());
 }
