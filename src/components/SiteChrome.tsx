@@ -154,10 +154,11 @@ export function SiteChrome({
         const loader = root.querySelector(".loader");
         const alreadyPlayed = window.sessionStorage.getItem("portfolio-intro") === "1";
         if (loader && !alreadyPlayed) {
+          window.sessionStorage.setItem("portfolio-intro", "1");
           motion.runIntro({
             loader,
             page: pageRef.current,
-            onDone: () => window.sessionStorage.setItem("portfolio-intro", "1"),
+            onDone: () => document.documentElement.classList.add("intro-done"),
           });
         } else if (loader) {
           loader.setAttribute("aria-busy", "false");
