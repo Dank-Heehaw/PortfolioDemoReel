@@ -12,7 +12,7 @@ export type WorkCategory = {
   label: string;
   meta: string;
   indexCategory: string;
-  featuredProjects: Pick<Project, "slug" | "title" | "category">[];
+  featuredProjects: Pick<Project, "slug" | "title" | "category" | "cover">[];
 };
 
 const WORK_CATEGORY_DEFS = [
@@ -52,7 +52,12 @@ function categoriesFrom(projects: Project[]): WorkCategory[] {
     featuredProjects: featuredSlugs.flatMap((slug) => {
       const project = projects.find((entry) => entry.slug === slug);
       return project
-        ? [{ slug: project.slug, title: project.title, category: project.category }]
+        ? [{
+            slug: project.slug,
+            title: project.title,
+            category: project.category,
+            cover: project.cover,
+          }]
         : [];
     }),
   }));

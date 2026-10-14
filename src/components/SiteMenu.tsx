@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { MenuIcon } from "@/components/MenuIcons";
 import { MENU, type MenuItem } from "@/lib/routes";
 import type { WorkCategory } from "@/lib/work";
@@ -105,8 +106,9 @@ function WorkPanel({ workCategories }: { workCategories: WorkCategory[] }) {
                     href={`/work?category=${encodeURIComponent(project.category)}`}
                     data-nav
                     data-menu-close
+                    aria-label={`${project.title} — view ${project.category} projects`}
+                    style={{ "--project-cover": `url("${project.cover}")` } as CSSProperties}
                   >
-                    {project.title}
                   </Link>
                 </li>
               ))}

@@ -210,7 +210,7 @@ export function bindCursor() {
 
   const onOver = (event) => {
     const hit = event.target.closest(
-      "a, button, [data-menu-toggle], [data-menu-close], [data-nav], [data-menu-work], [data-work-cat]"
+      "a, button, [data-menu-toggle], [data-menu-close], [data-nav], [data-menu-work]"
     );
     root.classList.toggle("is-hover", Boolean(hit));
   };
